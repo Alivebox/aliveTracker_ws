@@ -7,8 +7,9 @@ from main.models import Group
 class GroupResource(ModelResource):
     class Meta:
         queryset = Group.objects.all()
-    def dehydrate(self, bundle):
-        bundle.data['success'] = True
-        return bundle
+        resourcename = 'groups'
+    # def dehydrate(self, bundle):
+    #     bundle.data['success'] = True
+    #     return bundle
     def determine_format(self, request):
         return 'application/json'
