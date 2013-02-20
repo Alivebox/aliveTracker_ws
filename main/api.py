@@ -1,13 +1,11 @@
-import copy
 from tastypie.resources import ModelResource
-from tastypie import fields
-
 from main.models import Group
+
 
 class GroupResource(ModelResource):
     class Meta:
         queryset = Group.objects.all()
-        resourcename = 'groups'
+        resource_name = 'group'
     # def dehydrate(self, bundle):
     #     bundle.data['success'] = True
     #     return bundle
