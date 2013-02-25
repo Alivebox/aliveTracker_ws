@@ -8,8 +8,7 @@ import rpdb2
 
 @api_view(['GET'])
 def user_authentication(request, password, email, format=None):
-
-    rpdb2.start_embedded_debugger('xyz')
+    # rpdb2.start_embedded_debugger('xyz')
     try:
         user = User.objects.get(password=password,email=email,entity_status=0)
     except User.DoesNotExist:
