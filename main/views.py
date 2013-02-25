@@ -6,14 +6,19 @@ from rest_framework.decorators import api_view
 import rpdb2
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 def user_authentication(request, password, email, format=None):
     # rpdb2.start_embedded_debugger('xyz')
     try:
-        user = User.objects.get(password=password,email=email,entity_status=0)
+         user = User.objects.get(password=password,email=email,entity_status=0)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    if request.method == 'POST':
+        user = request.DATA
         serializer = UserSerializer(user)
         return Response(serializer.data)
