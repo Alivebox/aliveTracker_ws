@@ -1,9 +1,9 @@
 from django.forms import widgets
 from rest_framework import serializers
-from groups.models import Group
+from main.models import Group, Group_User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         #incomplete FIX
@@ -28,6 +28,31 @@ class UserSerializer(serializers.ModelSerializer):
             instance.web_site_url = attrs.get('web_site_url', instance.web_site_url)
             instance.created = attrs.get('created', instance.created)
             instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            return instance
+
+        # Create new instance
+        return Group(**attrs)
+
+
+class Group_UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group_User
+        #incomplete FIX
+    fields = ('id', 'user_id', 'group_id', 'role_id')
+    pk = serializers.Field()
+    user = serializers.IntegerField()
+    group = serializers.IntegerField()
+    role = serializers.IntegerField()
+
+    def restore_object(self, attrs, instance=None):
+        """
+        Create or update a new snippet instance.
+        """
+        if instance:
+            # Update existing instance
+            instance.user = attrs.get('user', instance.user)
+            instance.group = attrs.get('group', instance.group)
+            instance.role = attrs.get('role', instance.role)
             return instance
 
         # Create new instance

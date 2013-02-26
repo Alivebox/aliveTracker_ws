@@ -1,22 +1,23 @@
 from main.models import Group_User
-from main.serializers import UserSerializer
+from groups.serializers import Group_UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-#import rpdb2
 
 
-@api_view(['GET','POST'])
-def retrieveMyGroups(request, argPassword, argUserID, argUserName, format=None):
+@api_view(['GET'])
+def retrieveMyGroups(request,  format=None):
 
-    #rpdb2.start_embedded_debugger('xyz')
     try:
-        tmpGroup = Group_User.objects.get(password=argPassword,user=argUserName,entity_status=0)
+        tmpMail = request.META['HTTP_USERNAME']
+        tmpPassword = request.META['HTTP_PASSWORD']
+        tmpUserID= request.META['HTTP_USER_ID']
+        tmpGroup = Group_User.objects.get_query_set().filter(user=tmpUserID,role =1)
     except Group_User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = UserSerializer(tmpGroup)
+        serializer = Group_UserSerializer(tmpGroup)
         return Response(serializer.data)
 
 
