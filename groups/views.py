@@ -1,5 +1,6 @@
-from main.models import Group_User
-from groups.serializers import Group_UserSerializer
+from main.models import Group_User, Group
+from main.utils import userAuthentication
+from groups.serializers import GroupSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -38,3 +39,13 @@ def retrieveGroupsIBelongTo(request, format=None):
         serializer = GroupSerializer(tmpResult)
         return Response(serializer.data)
 
+
+@api_view(['POST'])
+def addLogEntry(request, format=None):
+
+    if not userAuthentication(request):
+        Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.method == 'POST':
+        # add code
+        Response(status=status.HTTP_202_ACCEPTED)
