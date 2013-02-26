@@ -1,5 +1,5 @@
-from main.models import User
-from groups.serializers import UserSerializer
+from main.models import Group_User
+from main.serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -7,14 +7,14 @@ from rest_framework.decorators import api_view
 
 
 @api_view(['GET','POST'])
-def user_authentication(request, password, email, format=None):
+def retrieveMyGroups(request, argPassword, argUserID, argUserName, format=None):
 
     #rpdb2.start_embedded_debugger('xyz')
     try:
-        user = User.objects.get(password=password,email=email,entity_status=0)
-    except User.DoesNotExist:
+        tmpGroup = Group_User.objects.get(password=argPassword,user=argUserName,entity_status=0)
+    except Group_User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(tmpGroup)
         return Response(serializer.data)

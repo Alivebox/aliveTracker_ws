@@ -1,6 +1,6 @@
 from django.forms import widgets
 from rest_framework import serializers
-from main.models import User
+from main.models import User, Group_User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,3 +27,28 @@ class UserSerializer(serializers.ModelSerializer):
 
         # Create new instance
         return User(**attrs)
+
+
+class GroupUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group_User
+    fields = ('id', 'user', 'group', 'role')
+    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
+    user = serializers.CharField(required=True,max_length=50)
+    role = serializers.CharField(max_length=50)
+    entity_status = serializers.IntegerField(default=0)
+
+    def restore_object(self, attrs, instance=None):
+        """
+        Create or update a new snippet instance.
+        """
+        if instance:
+            # Update existing instance
+            instance.user = attrs.get('user', instance.user)
+            instance.group = attrs.get('group', instance.group)
+            instance.role = attrs.get('role', instance.role)
+            instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            return instance
+
+        # Create new instance
+        return Group_User(**attrs)

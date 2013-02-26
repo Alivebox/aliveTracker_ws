@@ -3,7 +3,7 @@ from django.contrib import admin
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = patterns('',
-                       url(r'^groups/(?P<password>[a-zA-Z0-9._%+-]{8,20})/(?P<email>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+\.[A-Za-z]{2,4})/$', 'groups.views.user_authentication'),
+                       url(r'^groups/(?P<password>[a-zA-Z0-9._%+-]{8,20})/(?P<userID>[a-z0-9_-]{8,20})/(?P<userName>[a-z0-9_-]{8,20})/$', 'groups.views.retrieveMyGroups'),
                        )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

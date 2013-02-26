@@ -3,13 +3,13 @@ from main.serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-import rpdb2
+#import rpdb2
 
 
 @api_view(['GET','POST'])
 def user_authentication(request, password, email, format=None):
 
-    rpdb2.start_embedded_debugger('xyz')
+    #rpdb2.start_embedded_debugger('xyz')
     try:
          user = User.objects.get(password=password,email=email,entity_status=0)
     except User.DoesNotExist:
