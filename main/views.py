@@ -3,6 +3,8 @@ from main.serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+from main.utils import responseUtil, userAuthentication
+
 
 @api_view(['GET','POST'])
 def user_authentication(request, format=None):
@@ -16,4 +18,4 @@ def user_authentication(request, format=None):
 
     if request.method == 'GET':
         serializer = UserSerializer(user)
-        return Response(serializer.data)
+        return responseUtil(True, None, serializer)
