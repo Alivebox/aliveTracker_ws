@@ -8,9 +8,11 @@ def responseUtil(argSuccess, argErrorCode, argResult):
                         content_type='application/json')
 
 
-def userAuthentication(argMail, argPassword):
+def userAuthentication(request):
     try:
-        tmpUser = User.objects.get(password=argPassword,email=argMail,entity_status=0)
+        tmpMail = request.META['HTTP_USERNAME']
+        tmpMail = request.META['HTTP_PASSWORD']
+        tmpUser = User.objects.get(password=tmpMail,email=tmpMail,entity_status=0)
         return True;
     except User.DoesNotExist:
         return False;
