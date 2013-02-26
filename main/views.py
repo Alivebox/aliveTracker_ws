@@ -31,3 +31,13 @@ def header_caption(request, format=None):
     # Header enviado desde cliente = X-MyHeader
     tmpHeader = request.META['HTTP_X_MYHEADER']
     return Response(tmpHeader)
+
+
+def validateUser(password, email, format=None):
+
+    try:
+        user = User.objects.get(password=password,email=email,entity_status=0)
+        if user:
+            return True
+    except User.DoesNotExist:
+        return False

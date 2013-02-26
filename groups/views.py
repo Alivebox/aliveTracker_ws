@@ -18,3 +18,16 @@ def retrieveMyGroups(request, argPassword, argUserID, argUserName, format=None):
     if request.method == 'GET':
         serializer = UserSerializer(tmpGroup)
         return Response(serializer.data)
+
+
+@api_view(['GET','POST'])
+def retrieveGroupsIBelongTo(request, argPassword, argUserID, argUserName, format=None):
+
+    try:
+        tmpGroup = Group_User.objects.get(password=argPassword,user=argUserName,entity_status=0)
+    except Group_User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(tmpGroup)
+        return Response(serializer.data)
