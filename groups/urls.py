@@ -2,7 +2,8 @@ from django.conf.urls import patterns, url
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = patterns('',
-                       url(r'^groups/$', 'groups.views.retrieveMyGroups'),
+                       url(r'^groups/retrieveMyGroups/$', 'groups.views.retrieveMyGroups'),
+                       url(r'^groups/retrieveGroupsIBelongTo/$', 'groups.views.retrieveGroupsIBelongTo'),
                        )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
