@@ -3,12 +3,10 @@ from main.serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-import rpdb2
 
 
 @api_view(['GET'])
 def retrieveUsersByProject(request, format=None):
-    # rpdb2.start_embedded_debugger('xyz')
     try:
         tmpProject = Project.objects.all()
         serializer = UserSerializer(tmpProject)
@@ -19,7 +17,6 @@ def retrieveUsersByProject(request, format=None):
 
 @api_view(['POST'])
 def addNewProjectToGroup(request, format=None):
-    # rpdb2.start_embedded_debugger('xyz')
     try:
         tmpProject = Project.objects.all()
         serializer = UserSerializer(tmpProject)
