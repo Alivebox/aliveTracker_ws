@@ -28,6 +28,6 @@ def user_authentication(request, password, email, format=None):
 def header_caption(request, format=None):
 
     rpdb2.start_embedded_debugger('abc')
-    # Header enviado desde cliente = My-Header
+    # Header enviado desde cliente = X-MyHeader
     tmpHeader = request.META['HTTP_X_MYHEADER']
     return Response(tmpHeader)
