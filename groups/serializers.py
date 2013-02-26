@@ -1,4 +1,3 @@
-from django.forms import widgets
 from rest_framework import serializers
 from main.models import Group, Group_User
 
@@ -6,9 +5,8 @@ from main.models import Group, Group_User
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        #incomplete FIX
     fields = ('id', 'name', 'description', 'logo_url', 'web_site_url','created','entity_status')
-    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
+    pk = serializers.Field()
     name = serializers.CharField(required=True,max_length=50)
     description = serializers.CharField(max_length=200)
     logo_url = serializers.CharField(required=True,max_length=50)
@@ -17,9 +15,6 @@ class GroupSerializer(serializers.ModelSerializer):
     entity_status = serializers.IntegerField(default=0)
 
     def restore_object(self, attrs, instance=None):
-        """
-        Create or update a new snippet instance.
-        """
         if instance:
             # Update existing instance
             instance.name = attrs.get('name', instance.name)
@@ -37,7 +32,6 @@ class GroupSerializer(serializers.ModelSerializer):
 class Group_UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group_User
-        #incomplete FIX
     fields = ('id', 'user_id', 'group_id', 'role_id')
     pk = serializers.Field()
     user = serializers.IntegerField()
@@ -45,9 +39,6 @@ class Group_UserSerializer(serializers.ModelSerializer):
     role = serializers.IntegerField()
 
     def restore_object(self, attrs, instance=None):
-        """
-        Create or update a new snippet instance.
-        """
         if instance:
             # Update existing instance
             instance.user = attrs.get('user', instance.user)
@@ -56,4 +47,4 @@ class Group_UserSerializer(serializers.ModelSerializer):
             return instance
 
         # Create new instance
-        return Group(**attrs)
+        return Group_User(**attrs)
