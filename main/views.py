@@ -3,9 +3,7 @@ from main.serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-from django.http import HttpResponse
-import json
-from main.utils import responseUtil
+from main.utils import responseUtil, userAuthentication
 
 
 @api_view(['GET','POST'])
