@@ -8,7 +8,7 @@ import json
 from main.utils import responseUtil
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 def user_authentication(request, format=None):
 
     try:
