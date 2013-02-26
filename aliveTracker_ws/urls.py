@@ -4,5 +4,4 @@ urlpatterns = patterns('',
                        url(r'^', include('projects.urls')),
                        url(r'^', include('main.urls')),
                        url(r'^', include('groups.urls')),
-
                        )
