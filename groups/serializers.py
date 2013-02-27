@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from main.models import Group, Group_User
+from main.models import Group, Group_User, Log
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -47,4 +47,31 @@ class Group_UserSerializer(serializers.ModelSerializer):
             return instance
 
         # Create new instance
+        return Group_User(**attrs)
+
+
+class LogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Log
+    fields = ('id', 'activity', 'time', 'date', 'user', 'project', 'group')
+    pk = serializers.Field()
+    activity = serializers.Field
+    time = serializers.Field
+    date = serializers.CharField
+    user = serializers.IntegerField()
+    project = serializers.IntegerField()
+    group = serializers.IntegerField()
+    entity_status = serializers.IntegerField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance:
+            instance.activity = attrs.get('activity', instance.activity)
+            instance.time = attrs.get('time', instance.time)
+            instance.date = attrs.get('date', instance.date)
+            instance.user = attrs.get('user', instance.user_id)
+            instance.project = attrs.get('project', instance.project_id)
+            instance.group = attrs.get('group', instance.group)
+            instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            return instance
+
         return Group_User(**attrs)
