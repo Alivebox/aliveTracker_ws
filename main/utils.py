@@ -1,7 +1,5 @@
-from django.http import HttpResponse
 from main.models import User
-
-import json
+from rest_framework.response import Response
 
 
 # Format a response that returns an json with the following properties:
@@ -9,8 +7,7 @@ import json
 # error String
 # Collection of data
 def responseJsonUtil(argSuccess, argErrorCode, argResult):
-    return HttpResponse(json.dumps({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data}),
-                        content_type='application/json')
+    return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
 
 
 # Validate if the user exists in DB
