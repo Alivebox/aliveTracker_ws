@@ -1,5 +1,5 @@
-from main.models import User
-from main.serializers import UserSerializer
+from main.models import User, Role
+from main.serializers import UserSerializer, RoleSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -19,3 +19,20 @@ def user_authentication(request, format=None):
     if request.method == 'GET':
         serializer = UserSerializer(user)
         return responseJsonUtil(True, None, serializer)
+
+
+@api_view(['GET'])
+def retrieveAllUserRoles(argRequest, format=None):
+
+    try:
+        if not userAuthentication(argRequest):
+            return responseJsonUtil(False, 'ERROR_10', None)
+
+        tmpRole = Role.objects.all()
+        tmpSerializer = RoleSerializer(tmpRole)
+        return responseJsonUtil(True, None, tmpSerializer)
+    except Role.DoesNotExist:
+        return Response(False, None, None)
+
+
+
