@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication
 
-
+# Returns a list of Projects by Group ID
 @api_view(['GET'])
 def retrieveAllProjectsByGroup(argRequest, format=None):
     try:
