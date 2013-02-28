@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from main.models import Project, User
+from main.models import Project, User, Group
 from projects.dtos import ProjectUserDTO
-from main.utils import dateToString
+from main.utils import stringToDate
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -13,7 +13,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     description = serializers.CharField(required=True,max_length=250)
     created = serializers.CharField(required=True,max_length=250)
     entity_status = serializers.IntegerField(default=0)
-    group = serializers.Field()
+    group = serializers.PrimaryKeyRelatedField()
 
     def restore_object(self, attrs, instance=None):
         """
@@ -23,12 +23,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             # Update existing instance
             instance.name = attrs.get('name', instance.name)
             instance.description = attrs.get('description', instance.description)
-            instance.created = attrs.get('created', dateToString(instance.created))
+            instance.created = attrs.get('created', instance.created)
             instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            instance.group = (attrs.get('group', instance.group))
             return instance
 
         # Create new instance
-        return User(**attrs)
+        return Project(**attrs)
 
 
 class ProjectUserDTOSerializer(serializers.Serializer):
