@@ -8,10 +8,10 @@ class GroupSerializer(serializers.ModelSerializer):
     fields = ('id', 'name', 'description', 'logo_url', 'web_site_url','created','entity_status')
     pk = serializers.Field()
     name = serializers.CharField(required=True,max_length=50)
-    description = serializers.CharField(max_length=200)
-    logo_url = serializers.CharField(required=True,max_length=50)
-    web_site_url = serializers.CharField(required=True,max_length=50)
-    created = serializers.IntegerField(default=0)
+    description = serializers.CharField(max_length=512)
+    logo_url = serializers.CharField(required=True,max_length=512)
+    web_site_url = serializers.CharField(required=True,max_length=512)
+    created = serializers.IntegerField()
     entity_status = serializers.IntegerField(default=0)
 
     def restore_object(self, attrs, instance=None):

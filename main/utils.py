@@ -28,3 +28,11 @@ def dateToString(argDate):
 # The format string which returns is ej: September 24 2010 17:03
 def stringToDate(argString):
     return argString.strptime('%B %d %Y %H:%M')
+
+
+# Retrieve a desired value from a List in a key-value format
+def getPropertyByName(argProperty,argData):
+
+    for key, value in argData:
+        if argProperty==key:
+            return value
