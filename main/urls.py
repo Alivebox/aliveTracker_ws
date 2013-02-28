@@ -7,7 +7,8 @@ urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),
                        url(r'^main/$', 'main.views.user_authentication'),
                        url(r'^main/permissions/$', 'main.views.user_permissions'),
-                       url(r'^main/register/$', 'main.views.register_user')
+                       url(r'^main/register/$', 'main.views.register_user'),
+                       url(r'^main/user/(?P<pk>[0-9]+)$', 'main.views.update_user'),
                        )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

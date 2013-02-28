@@ -3,10 +3,8 @@ from main.serializers import UserSerializer, PermissionGroupDTOSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, userAuthentication
-from rest_framework.renderers import JSONRenderer
+from main.utils import responseJsonUtil
 from rest_framework.parsers import JSONParser
-from rest_framework.response import Response
 
 @api_view(['GET','POST'])
 def user_authentication(request, format=None):
@@ -71,6 +69,23 @@ def register_user(request, format=None):
         tmpUserSerializer = UserSerializer(data=data)
         if tmpUserSerializer.is_valid():
             tmpUserSerializer.save()
-            return responseJsonUtil(tmpUserSerializer)
+            return responseJsonUtil(True, None, tmpUserSerializer)
         else:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return responseJsonUtil(False, 'ERROR01',  None)
+
+
+@api_view(['PUT'])
+def update_user(request, pk, format=None):
+
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return responseJsonUtil(False, 404, None)
+
+    data = JSONParser().parse(request)
+    serializer = UserSerializer(user, data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return responseJsonUtil(True, None, serializer)
+    else:
+        return responseJsonUtil(False, 'ERROR01',  None)
