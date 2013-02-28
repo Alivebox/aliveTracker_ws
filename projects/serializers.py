@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from main.models import Project
-from main.models import User
+from main.models import Project, User
+from projects.dtos import ProjectUserDTO
 from main.utils import dateToString
 
 
@@ -29,4 +29,21 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         # Create new instance
         return User(**attrs)
-        
+
+
+class ProjectUserDTOSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    project_id = serializers.IntegerField()
+    role_id = serializers.IntegerField()
+    username = serializers.CharField()
+    rolename = serializers.CharField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.user_id = attrs['user_id']
+            instance.group_id = attrs['group_id']
+            instance.role_id = attrs['role_id']
+            instance.username = attrs['username']
+            instance.rolename = attrs['rolename']
+            return instance
+        return ProjectUserDTO(**attrs)
