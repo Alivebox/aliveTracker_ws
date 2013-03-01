@@ -1,5 +1,6 @@
 from main.models import User
 from rest_framework.response import Response
+import string, datetime, smtplib, random, hashlib
 
 
 # Format a response that returns an json with the following properties:
@@ -36,3 +37,43 @@ def getPropertyByName(argProperty,argData):
     for key, value in argData:
         if argProperty==key:
             return value
+
+
+# Sends email with the specified data
+def sendEmail(argFROM, argTO, argSUBJECT, argMESSAGE):
+
+    BODY = string.join((
+                           "From: %s" % argFROM,
+                           "Date: %s" % datetime.datetime.now(),
+                           "To: %s" % argTO,
+                           "Subject: %s" % argSUBJECT ,
+                           "",
+                           argMESSAGE
+                       ), "\r\n")
+    try:
+        server = smtplib.SMTP('mail.alivebox.com')
+        server.sendmail(argFROM, argTO, BODY)
+        return True
+    except:
+        return False
+
+
+# Generates a random alfanumeric token of the specified size
+def tokenGenerator(size=8, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for x in range(size))
+
+
+#Encode the argString to MD5
+def md5Encoding(argString):
+    code = hashlib.md5()
+    code.update(argString)
+    return code.hexdigest()
+
+
+# Validate if the email exists in DB
+def emailAuthentication(argEmail):
+    try:
+        tmpUser = User.objects.get(email=argEmail,entity_status=0)
+        return True;
+    except User.DoesNotExist:
+        return False;

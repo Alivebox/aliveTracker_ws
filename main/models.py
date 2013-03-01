@@ -82,3 +82,11 @@ class Project_User(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+class User_Forgot_Password(models.Model):
+    user = models.ForeignKey(User)
+    token = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.name
