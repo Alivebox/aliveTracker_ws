@@ -121,6 +121,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'main',
     'groups',
+    'logs'
 )
 
 # A sample logging configuration. The only tangible logging

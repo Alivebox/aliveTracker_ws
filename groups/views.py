@@ -63,23 +63,6 @@ def groupsIBelongServices(request, format=None):
             return responseJsonUtil(True, None, None)
 
 
-@api_view(['POST'])
-def addLogEntry(request, format=None):
-
-    if not userAuthentication(request):
-        Response(status=status.HTTP_401_UNAUTHORIZED)
-
-    if request.method == 'POST':
-        # add code
-        data = JSONParser().parse(request)
-        tmpLogSerializer = LogSerializer(data=data)
-        if tmpLogSerializer.is_valid():
-            tmpLogSerializer.save()
-            return JSONResponse(tmpLogSerializer.data, status=201)
-        else:
-            return JSONResponse(tmpLogSerializer.errors, status=400)
-
-
 class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders it's content into JSON.
