@@ -27,7 +27,7 @@ class Project(models.Model):
 class User(models.Model):
     name = models.CharField(max_length=50)
     email = models.CharField(max_length=50, unique=True)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=128)
     entity_status = models.SmallIntegerField(default=0)
 
     def __unicode__(self):
@@ -86,7 +86,7 @@ class Project_User(models.Model):
 
 class User_Forgot_Password(models.Model):
     user = models.ForeignKey(User)
-    token = models.CharField(max_length=50)
+    token = models.CharField(max_length=128)
 
     def __unicode__(self):
         return self.name

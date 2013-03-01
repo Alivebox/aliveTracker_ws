@@ -1,4 +1,4 @@
-from main.models import User
+from main.models import User, User_Forgot_Password
 from rest_framework.response import Response
 import string, datetime, smtplib, random, hashlib
 
@@ -8,7 +8,10 @@ import string, datetime, smtplib, random, hashlib
 # error String
 # Collection of data
 def responseJsonUtil(argSuccess, argErrorCode, argResult):
-    return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
+    if argResult == None:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult})
+    else:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
 
 
 # Validate if the user exists in DB
@@ -71,9 +74,20 @@ def md5Encoding(argString):
 
 
 # Validate if the email exists in DB
-def emailAuthentication(argEmail):
+def emailExists(argEmail):
     try:
-        tmpUser = User.objects.get(email=argEmail,entity_status=0)
+        tmpUser = User.objects.get(email=argEmail)
         return True;
     except User.DoesNotExist:
+        return False;
+
+
+#
+# Validate if the email and token exists in DB
+def correctForgotPasswordToken(argEmail, argToken):
+    try:
+        tmpUser = User.objects.get(email=argEmail)
+        User_Forgot_Password.objects.get(user=tmpUser, token=argToken)
+        return True
+    except User_Forgot_Password.DoesNotExist:
         return False;

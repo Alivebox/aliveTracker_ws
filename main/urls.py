@@ -10,6 +10,7 @@ urlpatterns = patterns('',
                        url(r'^main/register/$', 'main.views.register_user'),
                        url(r'^main/user/(?P<pk>[0-9]+)$', 'main.views.update_user'),
                        url(r'^main/forgotPassword/$', 'main.views.forgotPassword'),
+                       url(r'^main/resetPassword/(?P<email>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})/(?P<token>[A-Za-z0-9]+)$', 'main.views.resetPassword'),
                        )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
