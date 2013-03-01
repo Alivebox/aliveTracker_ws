@@ -1,4 +1,4 @@
-from main.models import Group_User, Group
+from main.models import Group_User, Group, Log, User, Project
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
 from groups.serializers import GroupSerializer, LogSerializer
 from django.http import HttpResponse
@@ -7,6 +7,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+from django.core import serializers
+from django.utils import simplejson
 
 
 @api_view(['GET','PUT','POST'])
@@ -39,23 +41,6 @@ def retrieveGroupsIBelongTo(request, format=None):
     if request.method == 'GET':
         serializer = GroupSerializer(tmpResult)
         return Response(serializer.data)
-
-
-@api_view(['POST'])
-def addLogEntry(request, format=None):
-
-    if not userAuthentication(request):
-        Response(status=status.HTTP_401_UNAUTHORIZED)
-
-    if request.method == 'POST':
-        # add code
-        data = JSONParser().parse(request)
-        tmpLogSerializer = LogSerializer(data=data)
-        if tmpLogSerializer.is_valid():
-            tmpLogSerializer.save()
-            return JSONResponse(tmpLogSerializer.data, status=201)
-        else:
-            return JSONResponse(tmpLogSerializer.errors, status=400)
 
 
 class JSONResponse(HttpResponse):

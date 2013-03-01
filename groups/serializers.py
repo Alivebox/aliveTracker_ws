@@ -58,9 +58,9 @@ class LogSerializer(serializers.ModelSerializer):
     activity = serializers.CharField()
     time = serializers.IntegerField(default=0)
     date = serializers.CharField()
-    user = serializers.IntegerField()
-    project = serializers.IntegerField()
-    group = serializers.IntegerField()
+    user = serializers.PrimaryKeyRelatedField
+    project = serializers.PrimaryKeyRelatedField
+    group = serializers.PrimaryKeyRelatedField
     entity_status = serializers.IntegerField(default=0)
 
     def restore_object(self, attrs, instance=None):
