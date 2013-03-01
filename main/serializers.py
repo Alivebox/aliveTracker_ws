@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
     name = serializers.CharField(required=True,max_length=50)
     email = serializers.CharField(max_length=50)
-    password = serializers.CharField(required=True, max_length=20)
+    password = serializers.CharField(required=True, max_length=128)
     entity_status = serializers.IntegerField(default=0)
 
     def restore_object(self, attrs, instance=None):
@@ -74,3 +74,15 @@ class PermissionGroupDTOSerializer(serializers.Serializer):
             instance.roleName = attrs['roleName']
             return instance
         return PermissionGroupDTO(**attrs)
+
+
+class UserForgotPasswordSerializer(serializers.Serializer):
+    user = serializers.IntegerField()
+    token = serializers.CharField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.user = attrs['user']
+            instance.token = attrs['token']
+            return instance
+        return UserForgotPasswordSerializer(**attrs)

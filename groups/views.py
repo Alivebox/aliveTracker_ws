@@ -7,6 +7,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
+import datetime
 
 
 @api_view(['GET','PUT','POST','DELETE'])
@@ -24,7 +25,7 @@ def myGroupsServices(request, format=None):
     if request.method == 'POST':
         try:
             data = JSONParser().parse(request)
-            newGroup = Group.objects.create(name=getPropertyByName('name',data.items()), description=getPropertyByName('description',data.items()),  logo_url=getPropertyByName('logo_url',data.items()),  web_site_url=getPropertyByName('web_site_url',data.items()),  created='2013-01-31')
+            newGroup = Group.objects.create(name=getPropertyByName('name',data.items()), description=getPropertyByName('description',data.items()),  logo_url=getPropertyByName('logo_url',data.items()),  web_site_url=getPropertyByName('web_site_url',data.items()),  created=datetime.datetime.now())
             serializer = GroupSerializer(newGroup)
             return responseJsonUtil(True, None, serializer)
         except:
@@ -33,7 +34,7 @@ def myGroupsServices(request, format=None):
     if request.method == 'PUT':
         try:
             data = JSONParser().parse(request)
-            Group.objects.filter(id=getPropertyByName('id',data.items())).update(name=getPropertyByName('name',data.items()), description=getPropertyByName('description',data.items()),  logo_url=getPropertyByName('logo_url',data.items()),  web_site_url=getPropertyByName('web_site_url',data.items()),  created='2013-01-31')
+            Group.objects.filter(id=getPropertyByName('id',data.items())).update(name=getPropertyByName('name',data.items()), description=getPropertyByName('description',data.items()),  logo_url=getPropertyByName('logo_url',data.items()),  web_site_url=getPropertyByName('web_site_url',data.items()))
             modifiedGroup = Group.objects.get(id=getPropertyByName('id',data.items()))
             serializer = GroupSerializer(modifiedGroup)
             return responseJsonUtil(True, None, serializer)

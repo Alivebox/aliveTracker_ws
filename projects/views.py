@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
 from rest_framework.parsers import JSONParser
+from projects.deserializers import projectDeserializer
 
 
 # Returns users who belongs to the respective ID
@@ -35,12 +36,10 @@ def projectServices(argRequest, format=None):
 
     if argRequest.method == 'POST':
         tmpData = JSONParser().parse(argRequest)
-        tmpProject = Project.objects.create(name=getPropertyByName('name', tmpData.items()),
-                                            description=getPropertyByName('description', tmpData.items()),
-                                            created=getPropertyByName('created', tmpData.items()),
-                                            group=Group.objects.get(pk=getPropertyByName('group', tmpData.items())))
-        tmpSerializer = ProjectSerializer(tmpProject)
-        return responseJsonUtil(True, None, tmpSerializer)
+        tmpProject = projectDeserializer(tmpData)
+        tmpProject.save()
+        tmpProjectSerializer = ProjectSerializer(tmpProject)
+        return responseJsonUtil(True, None, tmpProjectSerializer)
 
     if argRequest.method == 'PUT':
         tmpData = JSONParser().parse(argRequest)
@@ -75,3 +74,5 @@ def updateProjectsUserList(request, format=None):
         return Response(serializer.data)
     except Project.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+    
