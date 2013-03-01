@@ -1,6 +1,6 @@
 from main.models import Group_User, Group, Log, User, Project
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
-from groups.serializers import GroupSerializer, LogSerializer
+from groups.serializers import GroupSerializer
 from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser

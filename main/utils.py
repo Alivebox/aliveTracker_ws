@@ -7,7 +7,10 @@ from rest_framework.response import Response
 # error String
 # Collection of data
 def responseJsonUtil(argSuccess, argErrorCode, argResult):
-    return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
+    if argResult == None:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult})
+    else:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
 
 
 # Validate if the user exists in DB
