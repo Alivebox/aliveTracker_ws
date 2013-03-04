@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from main.models import Project
+from main.models import Project, Project_User
 from projects.dtos import ProjectUserDTO, ProjectUserListDTO
 
 
@@ -12,6 +12,15 @@ class ProjectSerializer(serializers.ModelSerializer):
         created = serializers.CharField(required=True,max_length=250)
         entity_status = serializers.IntegerField(default=0)
         group = serializers.PrimaryKeyRelatedField()
+
+
+class ProjectUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project_User
+        fields = ('user', 'project', 'rol')
+        user = serializers.PrimaryKeyRelatedField()
+        project = serializers.PrimaryKeyRelatedField()
+        rol = serializers.PrimaryKeyRelatedField()
 
 
 class ProjectUserDTOSerializer(serializers.Serializer):

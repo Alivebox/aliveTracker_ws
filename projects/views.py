@@ -1,5 +1,5 @@
 from main.models import Project, Group, User
-from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer
+from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, ProjectUserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -57,7 +57,7 @@ def createProjectListDTOObject(argProject, argUserList):
     return tmpProjectUserListDTOSerializer
 
 
-# Project Services
+# Save and update projects
 @api_view(['POST', 'PUT'])
 def saveProject(argRequest, format=None):
     if not userAuthentication(argRequest):
@@ -80,6 +80,22 @@ def saveProject(argRequest, format=None):
         tmpProject = Project.objects.get(id=getPropertyByName('id', tmpData.items()))
         tmpSerializer = ProjectSerializer(tmpProject)
         return responseJsonUtil(True, None, tmpSerializer)
+
+
+# Save a userList
+@api_view(['POST'])
+def saveProjectUserList(argRequest, format=None):
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False, 'ERROR_100', None)
+
+    if argRequest.method == 'POST':
+        tmpData = JSONParser().parse(argRequest)
+        tmpProjectUserSerializer = ProjectUserSerializer(data=tmpData)
+        if tmpProjectUserSerializer.is_valid():
+            tmpProjectUserSerializer.save()
+            return responseJsonUtil(True, None, None)
+        else:
+            return responseJsonUtil(False, 'ERROR_308',  None)
 
 
 @api_view(['DELETE'])
