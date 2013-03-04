@@ -75,3 +75,4 @@ class LogSerializer(serializers.ModelSerializer):
             return instance
 
         return Group_User(**attrs)
+

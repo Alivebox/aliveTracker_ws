@@ -1,4 +1,4 @@
-from main.models import User, User_Forgot_Password
+from main.models import User, User_Forgot_Password, Group, Group_User, Role
 from rest_framework.response import Response
 import string, datetime, smtplib, random, hashlib
 
@@ -14,15 +14,36 @@ def responseJsonUtil(argSuccess, argErrorCode, argResult):
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
 
 
+
+# Build a Json Response with raw JSON element as  argRawResult
+def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
+    if argRawResult == None:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
+    else:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
+
 # Validate if the user exists in DB
 def userAuthentication(request):
     try:
         tmpMail = request.META['HTTP_USERNAME']
         tmpPassword = request.META['HTTP_PASSWORD']
-        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
         return True;
     except User.DoesNotExist:
         return False;
+
+
+# Retrieves a user base on request dada
+def retrieveUser(request):
+
+    try:
+        tmpMail = request.META['HTTP_USERNAME']
+        tmpPassword = request.META['HTTP_PASSWORD']
+        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        return tmpUser
+    except User.DoesNotExist:
+        return None
+
 
 # The format string which returns is ej: September 24 2010 17:03
 def dateToString(argDate):
@@ -82,12 +103,35 @@ def emailExists(argEmail):
         return False;
 
 
+# Validate if the group exists in DB
+def groupExists(argGroupID):
+    try:
+        tmpGroup = Group.objects.get(id=argGroupID)
+        return True;
+    except Group.DoesNotExist:
+        return False;
+
+
+# Validate if the user is group manager
+def userIsGroupAdmin(argRequest, argGroupID):
+    try:
+        tmpUser = retrieveUser(argRequest)
+        tmpGroup = Group.objects.get(id=argGroupID)
+        tmpRole = Role.objects.get(id=1)
+        Group_User.objects.get(user=tmpUser,group=tmpGroup,role=tmpRole)
+        return True;
+    except Group_User.DoesNotExist:
+        return False;
+
 #
 # Validate if the email and token exists in DB
 def correctForgotPasswordToken(argEmail, argToken):
     try:
         tmpUser = User.objects.get(email=argEmail)
         User_Forgot_Password.objects.get(user=tmpUser, token=argToken)
-        return True
+        return True;
     except User_Forgot_Password.DoesNotExist:
         return False;
+
+
+

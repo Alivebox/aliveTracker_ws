@@ -33,9 +33,10 @@ class GroupUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group_User
     fields = ('id', 'user', 'group', 'role')
-    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
-    user = serializers.CharField(required=True,max_length=50)
-    role = serializers.CharField(max_length=50)
+    pk = serializers.Field()
+    user = serializers.IntegerField()
+    group = serializers.IntegerField()
+    role = serializers.IntegerField()
     entity_status = serializers.IntegerField(default=0)
 
     def restore_object(self, attrs, instance=None):
