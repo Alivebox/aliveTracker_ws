@@ -1,35 +1,26 @@
 from rest_framework import serializers
-from main.models import Project, User, Group
-from projects.dtos import ProjectUserDTO
-from main.utils import stringToDate
+from main.models import Project, Project_User
+from projects.dtos import ProjectUserDTO, ProjectUserListDTO
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-    fields = ('id', 'name', 'description', 'created', 'entity_status', 'group')
-    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
-    name = serializers.CharField(required=True,max_length=30)
-    description = serializers.CharField(required=True,max_length=250)
-    created = serializers.CharField(required=True,max_length=250)
-    entity_status = serializers.IntegerField(default=0)
-    group = serializers.PrimaryKeyRelatedField()
+        fields = ('name', 'description', 'created', 'entity_status', 'group')
+        name = serializers.CharField(required=True,max_length=30)
+        description = serializers.CharField(required=True,max_length=250)
+        created = serializers.CharField(required=True,max_length=250)
+        entity_status = serializers.IntegerField(default=0)
+        group = serializers.PrimaryKeyRelatedField()
 
-    def restore_object(self, attrs, instance=None):
-        """
-        Create or update a new snippet instance.
-        """
-        if instance:
-            # Update existing instance
-            instance.name = attrs.get('name', instance.name)
-            instance.description = attrs.get('description', instance.description)
-            instance.created = attrs.get('created', instance.created)
-            instance.entity_status = attrs.get('entity_status', instance.entity_status)
-            instance.group = (attrs.get('group', instance.group))
-            return instance
 
-        # Create new instance
-        return Project(**attrs)
+class ProjectUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project_User
+        fields = ('user', 'project', 'rol')
+        user = serializers.PrimaryKeyRelatedField()
+        project = serializers.PrimaryKeyRelatedField()
+        rol = serializers.PrimaryKeyRelatedField()
 
 
 class ProjectUserDTOSerializer(serializers.Serializer):
@@ -48,3 +39,22 @@ class ProjectUserDTOSerializer(serializers.Serializer):
             instance.rolename = attrs['rolename']
             return instance
         return ProjectUserDTO(**attrs)
+
+class ProjectUserListDTOSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.IntegerField()
+    created = serializers.IntegerField()
+    description = serializers.CharField()
+    groupID = serializers.CharField()
+    users = serializers.CharField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.id = attrs['id']
+            instance.name = attrs['name']
+            instance.created = attrs['created']
+            instance.description = attrs['description']
+            instance.groupID = attrs['groupID']
+            instance.users = attrs['users']
+            return instance
+        return ProjectUserListDTO(**attrs)
