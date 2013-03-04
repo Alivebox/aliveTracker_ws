@@ -1,11 +1,13 @@
-from main.models import Project, Project_User, Group
-from projects.serializers import ProjectSerializer, ProjectUserDTOSerializer
+from main.models import Project, Group, User
+from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
 from rest_framework.parsers import JSONParser
 from projects.deserializers import projectDeserializer
+from main.serializers import UserSerializer
+from projects.dtos import ProjectUserListDTO
 
 
 # Returns users who belongs to the respective ID
@@ -28,14 +30,31 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
 # Returns users who belongs to the respective ID
 @api_view(['GET'])
 def getProject(argRequest, argProjectID, format=None):
-    if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_100', None)
+    # if not userAuthentication(argRequest):
+    #     return responseJsonUtil(False, 'ERROR_100', None)
     try:
         tmpProject = Project.objects.get(id=argProjectID)
-        serializer = ProjectSerializer(tmpProject)
-        return responseJsonUtil(True, None, serializer)
+        tmpProjectSerializer = ProjectSerializer(tmpProject)
+        tmpUserList = User.objects.raw('select muser.id, muser.name, muser.email, muser.password, muser.entity_status \
+        from main_user muser inner join  main_project_user project_user on muser.id = project_user.user_id \
+        where project_user.project_id = ' + str(argProjectID))
+        tmpUserListSerializer = UserSerializer(tmpUserList)
+        tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserListSerializer)
+        return responseJsonUtil(True, None, tmpProjectUserListSerializer)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR_500', None)
+
+
+# Creates a ProjectListDTO, Using the project model and the userList
+def createProjectListDTOObject(argProject, argUserList):
+    tmpProjectUserListDTO = ProjectUserListDTO(id=getPropertyByName('id', argProject.data.items()),
+                                           name=getPropertyByName('name', argProject.data.items()),
+                                           created=getPropertyByName('created', argProject.data.items()),
+                                           description=getPropertyByName('description', argProject.data.items()),
+                                           groupID=getPropertyByName('group', argProject.data.items()),
+                                           users=argUserList.data)
+    tmpProjectUserListDTOSerializer = ProjectUserListDTOSerializer(tmpProjectUserListDTO)
+    return tmpProjectUserListDTOSerializer
 
 
 # Project Services

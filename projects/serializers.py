@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from main.models import Project, Group
-from projects.dtos import ProjectUserDTO
+from main.models import Project
+from projects.dtos import ProjectUserDTO, ProjectUserListDTO
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('name', 'description', 'created', 'entity_status')
+        fields = ('name', 'description', 'created', 'entity_status', 'group')
         name = serializers.CharField(required=True,max_length=30)
         description = serializers.CharField(required=True,max_length=250)
         created = serializers.CharField(required=True,max_length=250)
@@ -30,3 +30,22 @@ class ProjectUserDTOSerializer(serializers.Serializer):
             instance.rolename = attrs['rolename']
             return instance
         return ProjectUserDTO(**attrs)
+
+class ProjectUserListDTOSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.IntegerField()
+    created = serializers.IntegerField()
+    description = serializers.CharField()
+    groupID = serializers.CharField()
+    users = serializers.CharField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.id = attrs['id']
+            instance.name = attrs['name']
+            instance.created = attrs['created']
+            instance.description = attrs['description']
+            instance.groupID = attrs['groupID']
+            instance.users = attrs['users']
+            return instance
+        return ProjectUserListDTO(**attrs)
