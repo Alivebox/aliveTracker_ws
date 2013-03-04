@@ -10,29 +10,39 @@ from projects.deserializers import projectDeserializer
 
 # Returns users who belongs to the respective ID
 @api_view(['GET'])
-def retrieveUsersByProject(argRequest, format=None):
+def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_10', None)
+        return responseJsonUtil(False, 'ERROR_100', None)
+    try:
+        tmpMail = argRequest.META['HTTP_USERNAME']
+        tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
+        from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id \
+        inner join main_project mproject on project_user.project_id = mproject.id \
+        where muser.email= "' + str(tmpMail) + '" and mproject.group_id = ' + str(argGroupID))
+        serializer = ProjectSerializer(tmpResult)
+        return responseJsonUtil(True, None, serializer)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR_500', None)
 
-    tmpProjectID = argRequest.META['HTTP_PROJECT_ID']
-    tmpResult = Project_User.objects.raw('select project_user.id, project_user.project_id, project_user.user_id, project_user.role_id, muser.name as userName, mrole.name as roleName\
-    from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id inner join main_role mrole on project_user.role_id = mrole.id \
-    where project_user.project_id =  ' + str(tmpProjectID))
-    serializer = ProjectUserDTOSerializer(tmpResult)
-    return responseJsonUtil(True, None, serializer)
+
+# Returns users who belongs to the respective ID
+@api_view(['GET'])
+def getProject(argRequest, argProjectID, format=None):
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False, 'ERROR_100', None)
+    try:
+        tmpProject = Project.objects.get(id=argProjectID)
+        serializer = ProjectSerializer(tmpProject)
+        return responseJsonUtil(True, None, serializer)
+    except Project.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR_500', None)
 
 
 # Project Services
-@api_view(['POST', 'PUT', 'GET'])
-def projectServices(argRequest, format=None):
+@api_view(['POST', 'PUT'])
+def saveProject(argRequest, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_10', None)
-
-    if argRequest.method == 'GET':
-        tmpGroupID = argRequest.META['HTTP_GROUP_ID']
-        tmpResult = Project.objects.raw('select * from main_project where group_id =  ' + str(tmpGroupID))
-        serializer = ProjectSerializer(tmpResult)
-        return responseJsonUtil(True, None, serializer)
+        return responseJsonUtil(False, 'ERROR_100', None)
 
     if argRequest.method == 'POST':
         tmpData = JSONParser().parse(argRequest)
