@@ -1,11 +1,11 @@
-from main.models import Project, Group
+from main.models import Project, Group, Project_User, Role, User
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
 from rest_framework.parsers import JSONParser
 from projects.deserializers import projectDeserializer
 from projects.dtos import ProjectUserListDTO, UserDTO
-from django.db import connection
+from django.db import connection, transaction
 
 
 # Returns users who belongs to the respective ID
@@ -74,16 +74,15 @@ def createProjectListDTOObject(argProject, argUserList):
 # Save and update projects
 @api_view(['POST', 'PUT'])
 def saveProject(argRequest, format=None):
-    if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_100', None)
+    # if not userAuthentication(argRequest):
+    #     return responseJsonUtil(False, 'ERROR_100', None)
 
     tmpData = JSONParser().parse(argRequest)
     if argRequest.method == 'POST':
         tmpProject = projectDeserializer(tmpData)
         tmpProject.save()
-        tmpProjectSerializer = ProjectSerializer(tmpProject)
-        return responseJsonUtil(True, None, tmpProjectSerializer)
-
+        updateUserListInProject(tmpData)
+        return responseJsonUtil(True, None, None)
     if argRequest.method == 'PUT':
         Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
             name=getPropertyByName('name', tmpData.items()),
@@ -91,6 +90,32 @@ def saveProject(argRequest, format=None):
             created=getPropertyByName('created', tmpData.items()),
             group=Group.objects.get(pk=getPropertyByName('group', tmpData.items())))
         return responseJsonUtil(True, None, None)
+
+
+# Update all users that belong to a project
+def updateUserListInProject(argData):
+    tmpProjectId = getPropertyByName('id', argData.items())
+    deleteUsersBelongProject(tmpProjectId)
+    insertProjectUsers(argData)
+
+
+# Delete all users that belong to a project
+def deleteUsersBelongProject(argProjectId):
+    cursor = connection.cursor()
+    cursor.execute('delete from main_project_user where project_id = ' + str(argProjectId))
+    transaction.commit_unless_managed()
+    connection.close()
+
+
+# Insert project_user
+def insertProjectUsers(argProjectUsers):
+    tmpList = getPropertyByName('users', argProjectUsers.items())
+    tmpProjectId = getPropertyByName('id', argProjectUsers.items())
+    for tmpProjectUser in tmpList:
+        Project_User.objects.create(user=User.objects.get(pk=getPropertyByName('id', tmpProjectUser.items())),
+                                    project=Project.objects.get(pk=tmpProjectId),
+                                    role=Role.objects.get(pk=getPropertyByName('roleId', tmpProjectUser.items())))
+
 
 
 # Creates a Project_User Model to be save into the project
