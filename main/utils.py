@@ -1,4 +1,4 @@
-from main.models import User, User_Forgot_Password, Group, Group_User, Role
+from main.models import User, User_Forgot_Password, Group, Group_User, Role, Project, Project_User
 from rest_framework.response import Response
 import string, datetime, smtplib, random, hashlib
 
@@ -117,9 +117,17 @@ def emailExists(argEmail):
 # Validate if the group exists in DB
 def groupExists(argGroupID):
     try:
-        tmpGroup = Group.objects.get(id=argGroupID)
+        Group.objects.get(id=argGroupID)
         return True;
     except Group.DoesNotExist:
+        return False;
+
+# Validate if the project exists in DB
+def projectExists(argProjectID):
+    try:
+        Project.objects.get(id=argProjectID)
+        return True;
+    except Project.DoesNotExist:
         return False;
 
 
@@ -132,6 +140,28 @@ def userIsGroupAdmin(argRequest, argGroupID):
         Group_User.objects.get(user=tmpUser,group=tmpGroup,role=tmpRole)
         return True;
     except Group_User.DoesNotExist:
+        return False;
+
+
+# Validate if the user is group member
+def userIsGroupMember(argRequest, argGroupID):
+    try:
+        tmpUser = retrieveUser(argRequest)
+        tmpGroup = Group.objects.get(id=argGroupID)
+        Group_User.objects.get(user=tmpUser,group=tmpGroup)
+        return True;
+    except Group_User.DoesNotExist:
+        return False;
+
+
+# Validate if the user is Project member
+def userIsProjectMember(argRequest, argProjectID):
+    try:
+        tmpUser = retrieveUser(argRequest)
+        tmpProject = Group.objects.get(id=argProjectID)
+        Project_User.objects.get(user=tmpUser,project=tmpProject)
+        return True;
+    except Project_User.DoesNotExist:
         return False;
 
 #

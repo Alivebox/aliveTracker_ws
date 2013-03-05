@@ -1,6 +1,6 @@
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Project
 from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer
-from main.utils import userAuthentication
+from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 from rest_framework.response import Response
 from rest_framework import status
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
@@ -73,9 +73,15 @@ def getProjectPermissionsByUser(argUser, argProject):
 
 @api_view(['GET'])
 def getUserByGroupAndProject(request, group, project):
-
     if not userAuthentication(request):
-        Response(status=status.HTTP_401_UNAUTHORIZED)
+        return responseJsonUtil(False, 'ERROR100',  None)
+    if not groupExists(group):
+        return responseJsonUtil(False, 'ERROR200',  None)
+    if not projectExists(project):
+        return responseJsonUtil(False, 'ERROR500',  None)
+    if not userIsGroupAdmin(request, group):
+        return responseJsonUtil(False, 'ERROR309',  None)
+
     if request.method == 'GET':
         tmpResultUser = User.objects.raw('select * from main_user user '
                                          'inner join (select user_id as userId, role_id as role_id from main_project_user where project_id in '
