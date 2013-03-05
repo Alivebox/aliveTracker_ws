@@ -7,6 +7,7 @@ class ProjectUserDTO(object):
         self.role_name = role_name
 
     def __unicode__(self):
+<<<<<<< HEAD
         return self.name
 
 
@@ -31,3 +32,6 @@ class UserDTO(object):
 
     def __unicode__(self):
         return self.email
+=======
+        return self.name
+>>>>>>> 284052432c8ed570e57f5bf9922f707336daf126
