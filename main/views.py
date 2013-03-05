@@ -3,8 +3,11 @@ from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDT
 from main.utils import userAuthentication
 from rest_framework.response import Response
 from rest_framework import status
+from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
+from main.serializers import UserSerializer, PermissionGroupDTOSerializer
+import json
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken
+from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken, userAuthentication
 from rest_framework.parsers import JSONParser
 
 @api_view(['GET','POST'])
@@ -15,7 +18,7 @@ def user_authentication(request, format=None):
         tmpPassword = request.META['HTTP_PASSWORD']
         user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return responseJsonUtil(False, 'ERROR_100',  None)
 
     if request.method == 'GET':
         serializer = UserSerializer(user)
@@ -24,38 +27,46 @@ def user_authentication(request, format=None):
 
 
 @api_view(['GET'])
-def user_permissions(request, format=None):
+def user_permissions(request, pk, format=None):
 
     try:
         tmpMail = request.META['HTTP_USERNAME']
         tmpPassword = request.META['HTTP_PASSWORD']
-        user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        tmpGroup = Group.objects.get(pk=pk, entity_status=0)
+        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    serializer = getGroupPermissionsByUser(user)
+        return responseJsonUtil(False, 'ERROR_100',  None)
+    except Group.DoesNotExist:
+        return responseJsonUtil(False, "ERROR_200", None)
+    serializer = getGroupPermissionsByUser(tmpUser, tmpGroup)
     return responseJsonUtil(True, None, serializer)
 
 
 
-def getGroupPermissionsByUser(user):
+def getGroupPermissionsByUser(argUser, argGroup):
     tmpResultGroups = Group_User.objects.raw('Select * from main_group_user usergroup inner join (\
             Select permission.id as idPermission, permission.name as namePermission, role.id  as idRole, role.name as roleName from main_permission_roles permroles inner join  main_permission permission on permission.id = permroles.permission_id, main_role role \
             where permission.entity_status = 0 \
             and  role.id = permroles.role_id \
             and role.entity_status = 0) \
             rolePermissions on usergroup.role_id = rolePermissions.idRole \
-        where usergroup.user_id = ' + str(user.pk))
+        where usergroup.user_id = ' + str(argUser.pk) +
+        ' and usergroup.group_id = ' + str(argGroup.pk)
+        )
     serializer = PermissionGroupDTOSerializer(tmpResultGroups)
     return serializer
 
 
-def getProjectPermissionsByUser(user):
+
+def getProjectPermissionsByUser(argUser, argProject):
     tmpResultProjects = Project_User.objects.raw('Select * from main_project_user userproject inner join (\
             Select permission.id as idPermission, permission.name as namePermission, role.id  as idRole, role.name as roleName from main_permission_roles permroles inner join  main_permission permission on permission.id = permroles.permission_id, main_role role \
             where permission.entity_status = 0 \
             and  role.id = permroles.role_id \
             and role.entity_status = 0) rolePermissions on userproject.role_id = rolePermissions.idRole \
-        where userproject.user_id = ' + str(user.pk))
+        where userproject.user_id = ' + str(argUser.pk)+
+        ' and userproject.project_id = ' + str(argProject.pk)
+    )
     serializer = PermissionGroupDTOSerializer(tmpResultProjects)
     return serializer
 
@@ -83,7 +94,7 @@ def register_user(request, format=None):
             tmpUserSerializer.save()
             return responseJsonUtil(True, None, tmpUserSerializer)
         else:
-            return responseJsonUtil(False, 'ERROR01',  None)
+            return responseJsonUtil(False, 'ERROR_101',  None)
 
 
 @api_view(['PUT'])
@@ -101,6 +112,33 @@ def update_user(request, pk, format=None):
         return responseJsonUtil(True, None, serializer)
     else:
         return responseJsonUtil(False, 'ERROR01',  None)
+
+
+@api_view(['GET'])
+def getUsers(request, format=None):
+
+    if not userAuthentication(request):
+        return responseJsonUtil(False, 'ERROR_100',  None)
+    tmpQUERY = request.QUERY_PARAMS
+    limit = int(tmpQUERY['limit'])
+    tmpFilter = tmpQUERY['filter']
+    filtersList = buildFilters(tmpFilter)
+    filter = filtersList[0]
+    tmpValue = filter["value"]
+    tmpValue = tmpValue.replace("%", "")
+    tmpProperty = filter["property"]
+    tmpResultQuery = User.objects.filter(name__icontains=tmpValue)[:limit]
+    serializer = UserSerializer(tmpResultQuery)
+    return responseJsonUtil(True, None, serializer)
+
+
+
+def buildFilters(argFilterQueryObject):
+
+    tmpFilter = '{ "filters" : ' + argFilterQueryObject + '}'
+    data = json.loads(tmpFilter)
+    filtersList = data["filters"]
+    return filtersList
 
 
 @api_view(['POST'])
