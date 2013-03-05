@@ -9,6 +9,7 @@ urlpatterns = patterns('',
                        url(r'^main/permissions/$', 'main.views.user_permissions'),
                        url(r'^main/register/$', 'main.views.register_user'),
                        url(r'^main/user/(?P<pk>[0-9]+)$', 'main.views.update_user'),
+                       url(r'^main/user/group/(?P<group>[0-9]+)/project/(?P<project>[0-9]+)$', 'main.views.getUserByGroupAndProject'),
                        url(r'^main/forgotPassword/$', 'main.views.forgotPassword'),
                        url(r'^main/resetPassword/(?P<email>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})/(?P<token>[A-Za-z0-9]+)$', 'main.views.resetPassword'),
                        )

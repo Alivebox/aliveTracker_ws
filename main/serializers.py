@@ -1,7 +1,7 @@
 from django.forms import widgets
 from rest_framework import serializers
 from main.models import User, Group_User
-from main.dtos import PermissionGroupDTO
+from main.dtos import PermissionGroupDTO, UserDTO
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,6 +74,20 @@ class PermissionGroupDTOSerializer(serializers.Serializer):
             instance.roleName = attrs['roleName']
             return instance
         return PermissionGroupDTO(**attrs)
+
+
+class UserDTOSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.CharField()
+    role_id = serializers.IntegerField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.id = attrs['id']
+            instance.email = attrs['email']
+            instance.role_id = attrs['role_id']
+            return instance
+        return UserDTO(**attrs)
 
 
 class UserForgotPasswordSerializer(serializers.Serializer):

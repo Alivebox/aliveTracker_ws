@@ -24,6 +24,17 @@ def userAuthentication(request):
     except User.DoesNotExist:
         return False;
 
+
+# return user filtering by request information
+def getUserByRequest(request):
+    try:
+        tmpMail = request.META['HTTP_USERNAME']
+        tmpPassword = request.META['HTTP_PASSWORD']
+        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        return tmpUser;
+    except User.DoesNotExist:
+        return None;
+
 # The format string which returns is ej: September 24 2010 17:03
 def dateToString(argDate):
     return argDate.strftime('%B %d %Y %H:%M')

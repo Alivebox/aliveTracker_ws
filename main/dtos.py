@@ -7,3 +7,9 @@ class PermissionGroupDTO(object):
         self.namePermission = namePermission
         self.idRole = idRole
         self.roleName = roleName
+
+class UserDTO(object):
+    def __init__(self, user_id, email, role_id):
+        self.user_id = user_id
+        self.email = email
+        self.role_id = role_id

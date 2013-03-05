@@ -1,5 +1,6 @@
-from main.models import User, Group_User, Project_User, User_Forgot_Password
-from main.serializers import UserSerializer, PermissionGroupDTOSerializer
+from main.models import User, Group_User, Project_User, User_Forgot_Password, Project
+from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer
+from main.utils import userAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -48,7 +49,6 @@ def getGroupPermissionsByUser(user):
     return serializer
 
 
-
 def getProjectPermissionsByUser(user):
     tmpResultProjects = Project_User.objects.raw('Select * from main_project_user userproject inner join (\
             Select permission.id as idPermission, permission.name as namePermission, role.id  as idRole, role.name as roleName from main_permission_roles permroles inner join  main_permission permission on permission.id = permroles.permission_id, main_role role \
@@ -59,6 +59,18 @@ def getProjectPermissionsByUser(user):
     serializer = PermissionGroupDTOSerializer(tmpResultProjects)
     return serializer
 
+
+@api_view(['GET'])
+def getUserByGroupAndProject(request, group, project):
+
+    if not userAuthentication(request):
+        Response(status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == 'GET':
+        tmpResultUser = User.objects.raw('select * from main_user user '
+                                         'inner join (select user_id as userId, role_id as role_id from main_project_user where project_id in '
+                                         '(select id from main_project  where group_id = '+str(group)+' and id='+str(project)+' )) tmpProjectUser on  user.id = tmpProjectUser.userId')
+        tmpSerializer = UserDTOSerializer(tmpResultUser)
+        return responseJsonUtil(True, None, tmpSerializer)
 
 
 @api_view(['POST'])
