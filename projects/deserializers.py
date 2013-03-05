@@ -2,6 +2,7 @@ from main.models import Project, Group
 from main.utils import getPropertyByName
 
 
+#Deserialize a project model
 def projectDeserializer(argData):
     tmpProject = Project(name=getPropertyByName('name', argData.items()),
                          description=getPropertyByName('description', argData.items()),
