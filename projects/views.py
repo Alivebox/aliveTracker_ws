@@ -1,28 +1,17 @@
-<<<<<<< HEAD
 from main.models import Project, Group
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
-=======
-from main.models import Project, Project_User, Group
-from projects.serializers import ProjectSerializer, ProjectUserDTOSerializer
-from rest_framework.response import Response
-from rest_framework import status
->>>>>>> 284052432c8ed570e57f5bf9922f707336daf126
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
 from rest_framework.parsers import JSONParser
 from projects.deserializers import projectDeserializer
-<<<<<<< HEAD
 from projects.dtos import ProjectUserListDTO, UserDTO
 from django.db import connection
-=======
->>>>>>> 284052432c8ed570e57f5bf9922f707336daf126
 
 
 # Returns users who belongs to the respective ID
 @api_view(['GET'])
-def retrieveUsersByProject(argRequest, format=None):
+def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
-<<<<<<< HEAD
         return responseJsonUtil(False, 'ERROR_100', None)
     try:
         tmpMail = argRequest.META['HTTP_USERNAME']
@@ -56,18 +45,8 @@ def getProject(argRequest, argProjectID, format=None):
         return responseJsonUtil(True, None, tmpProjectUserListSerializer)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR_500', None)
-=======
-        return responseJsonUtil(False, 'ERROR_10', None)
->>>>>>> 284052432c8ed570e57f5bf9922f707336daf126
 
-    tmpProjectID = argRequest.META['HTTP_PROJECT_ID']
-    tmpResult = Project_User.objects.raw('select project_user.id, project_user.project_id, project_user.user_id, project_user.role_id, muser.name as userName, mrole.name as roleName\
-    from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id inner join main_role mrole on project_user.role_id = mrole.id \
-    where project_user.project_id =  ' + str(tmpProjectID))
-    serializer = ProjectUserDTOSerializer(tmpResult)
-    return responseJsonUtil(True, None, serializer)
 
-<<<<<<< HEAD
 # Get the query result to serialize
 def convertUserRole(argUserRoleResult):
     tmpList = []
@@ -83,27 +62,20 @@ def convertUserRole(argUserRoleResult):
 # Creates a ProjectListDTO, Using the project model and the userList
 def createProjectListDTOObject(argProject, argUserList):
     tmpProjectUserListDTO = ProjectUserListDTO(id=getPropertyByName('id', argProject.data.items()),
-                                           name=getPropertyByName('name', argProject.data.items()),
-                                           created=getPropertyByName('created', argProject.data.items()),
-                                           description=getPropertyByName('description', argProject.data.items()),
-                                           groupID=getPropertyByName('group', argProject.data.items()),
-                                           users=argUserList)
+                                               name=getPropertyByName('name', argProject.data.items()),
+                                               created=getPropertyByName('created', argProject.data.items()),
+                                               description=getPropertyByName('description', argProject.data.items()),
+                                               groupID=getPropertyByName('group', argProject.data.items()),
+                                               users=argUserList)
     tmpProjectUserListDTOSerializer = ProjectUserListDTOSerializer(tmpProjectUserListDTO)
     return tmpProjectUserListDTOSerializer
-=======
->>>>>>> 284052432c8ed570e57f5bf9922f707336daf126
 
-# Project Services
-@api_view(['POST', 'PUT', 'GET'])
-def projectServices(argRequest, format=None):
+
+# Save and update projects
+@api_view(['POST', 'PUT'])
+def saveProject(argRequest, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_10', None)
-
-    if argRequest.method == 'GET':
-        tmpGroupID = argRequest.META['HTTP_GROUP_ID']
-        tmpResult = Project.objects.raw('select * from main_project where group_id =  ' + str(tmpGroupID))
-        serializer = ProjectSerializer(tmpResult)
-        return responseJsonUtil(True, None, serializer)
+        return responseJsonUtil(False, 'ERROR_100', None)
 
     tmpData = JSONParser().parse(argRequest)
     if argRequest.method == 'POST':
@@ -118,18 +90,10 @@ def projectServices(argRequest, format=None):
             description=getPropertyByName('description', tmpData.items()),
             created=getPropertyByName('created', tmpData.items()),
             group=Group.objects.get(pk=getPropertyByName('group', tmpData.items())))
-<<<<<<< HEAD
         return responseJsonUtil(True, None, None)
 
 
 # Creates a Project_User Model to be save into the project
-=======
-        tmpProject = Project.objects.get(id=getPropertyByName('id', tmpData.items()))
-        tmpSerializer = ProjectSerializer(tmpProject)
-        return responseJsonUtil(True, None, tmpSerializer)
-
-
->>>>>>> 284052432c8ed570e57f5bf9922f707336daf126
 @api_view(['DELETE'])
 def deleteProject(argRequest, argId, format=None):
     if not userAuthentication(argRequest):
