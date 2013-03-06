@@ -14,6 +14,14 @@ def responseJsonUtil(argSuccess, argErrorCode, argResult):
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
 
 
+# Build a Json Response with raw JSON element as argRawResult
+def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
+    if argRawResult == None:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
+    else:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
+
+
 # Validate if the user exists in DB
 def userAuthentication(request):
     try:
