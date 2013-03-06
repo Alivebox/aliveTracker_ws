@@ -8,6 +8,7 @@ import datetime
 
 @api_view(['DELETE', 'POST', 'PUT'])
 def groupsServices(request, pk, format=None):
+
     if userAuthentication(request):
         if request.method == 'DELETE':
             if groupExists(pk):
