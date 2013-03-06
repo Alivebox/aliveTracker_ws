@@ -1,4 +1,4 @@
-from main.models import User, Group_User, Project_User, User_Forgot_Password, Project
+from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
 from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 from rest_framework.response import Response
@@ -9,6 +9,7 @@ import json
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken, userAuthentication
 from rest_framework.parsers import JSONParser
+import json
 
 @api_view(['GET','POST'])
 def user_authentication(request, format=None):
@@ -42,7 +43,6 @@ def user_permissions(request, pk, format=None):
     return responseJsonUtil(True, None, serializer)
 
 
-
 def getGroupPermissionsByUser(argUser, argGroup):
     tmpResultGroups = Group_User.objects.raw('Select * from main_group_user usergroup inner join (\
             Select permission.id as idPermission, permission.name as namePermission, role.id  as idRole, role.name as roleName from main_permission_roles permroles inner join  main_permission permission on permission.id = permroles.permission_id, main_role role \
@@ -51,11 +51,10 @@ def getGroupPermissionsByUser(argUser, argGroup):
             and role.entity_status = 0) \
             rolePermissions on usergroup.role_id = rolePermissions.idRole \
         where usergroup.user_id = ' + str(argUser.pk) +
-        ' and usergroup.group_id = ' + str(argGroup.pk)
-        )
+                                             ' and usergroup.group_id = ' + str(argGroup.pk)
+    )
     serializer = PermissionGroupDTOSerializer(tmpResultGroups)
     return serializer
-
 
 
 def getProjectPermissionsByUser(argUser, argProject):
@@ -65,7 +64,7 @@ def getProjectPermissionsByUser(argUser, argProject):
             and  role.id = permroles.role_id \
             and role.entity_status = 0) rolePermissions on userproject.role_id = rolePermissions.idRole \
         where userproject.user_id = ' + str(argUser.pk)+
-        ' and userproject.project_id = ' + str(argProject.pk)
+                                                 ' and userproject.project_id = ' + str(argProject.pk)
     )
     serializer = PermissionGroupDTOSerializer(tmpResultProjects)
     return serializer
@@ -136,7 +135,6 @@ def getUsers(request, format=None):
     tmpResultQuery = User.objects.filter(name__icontains=tmpValue)[:limit]
     serializer = UserSerializer(tmpResultQuery)
     return responseJsonUtil(True, None, serializer)
-
 
 
 def buildFilters(argFilterQueryObject):
