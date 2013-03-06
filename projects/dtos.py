@@ -21,3 +21,13 @@ class ProjectUserListDTO(object):
 
     def __unicode__(self):
         return self.name
+
+
+class UserDTO(object):
+    def __init__(self, id, email, roleId):
+        self.id = id
+        self.email = email
+        self.roleId = roleId
+
+    def __unicode__(self):
+        return self.email

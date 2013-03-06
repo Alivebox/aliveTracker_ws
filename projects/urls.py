@@ -5,8 +5,7 @@ urlpatterns = patterns('',
                        url(r'^projects/group/(?P<argGroupID>[0-9]+)$', 'projects.views.getProjectsByUserAndGroup'),
                        url(r'^projects/(?P<argProjectID>[0-9]+)$', 'projects.views.getProject'),
                        url(r'^projects/saveProject/$', 'projects.views.saveProject'),
-                       url(r'^projects/saveProjectUsers/$', 'projects.views.saveProjectUserList'),
                        url(r'^projects/deleteProject', 'projects.views.deleteProject'),
-)
+                       )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
