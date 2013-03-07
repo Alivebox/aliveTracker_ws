@@ -18,7 +18,8 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
         tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
         from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id \
         inner join main_project mproject on project_user.project_id = mproject.id \
-        where muser.email= "' + str(tmpMail) + '" and mproject.group_id = ' + str(argGroupID))
+        where muser.entity_status = 0 and muser.email= "' +
+        str(tmpMail) + '" and mproject.group_id = ' + str(argGroupID))
         serializer = ProjectSerializer(tmpResult)
         return responseJsonUtil(True, None, serializer)
     except BaseException:
@@ -37,7 +38,7 @@ def getProject(argRequest, argProjectID, format=None):
         cursor.execute('select muser.id as id, muser.email as email, mrole.id as roleId\
         from main_project_user project_user inner join main_user muser on muser.id = project_user.user_id \
         inner join main_role mrole on project_user.role_id = mrole.id \
-        where project_user.project_id = ' + str(argProjectID))
+        where .entity_status = 0 and project_user.project_id = ' + str(argProjectID))
         tmpResult = cursor.fetchall()
         tmpUserSerializer = convertUserRole(tmpResult)
         tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserSerializer)

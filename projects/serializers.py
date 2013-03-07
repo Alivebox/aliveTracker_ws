@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from main.models import Project, Project_User
-from projects.dtos import ProjectUserDTO, ProjectUserListDTO
+from main.models import Project
+from projects.dtos import ProjectUserListDTO, UserDTO
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -13,32 +13,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         entity_status = serializers.IntegerField(default=0)
         group = serializers.PrimaryKeyRelatedField()
 
-
-class ProjectUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project_User
-        fields = ('user', 'project', 'rol')
-        user = serializers.PrimaryKeyRelatedField()
-        project = serializers.PrimaryKeyRelatedField()
-        rol = serializers.PrimaryKeyRelatedField()
-
-
-class ProjectUserDTOSerializer(serializers.Serializer):
-    user_id = serializers.IntegerField()
-    project_id = serializers.IntegerField()
-    role_id = serializers.IntegerField()
-    username = serializers.CharField()
-    rolename = serializers.CharField()
-
-    def restore_object(self, attrs, instance=None):
-        if instance is not None:
-            instance.user_id = attrs['user_id']
-            instance.group_id = attrs['group_id']
-            instance.role_id = attrs['role_id']
-            instance.username = attrs['username']
-            instance.rolename = attrs['rolename']
-            return instance
-        return ProjectUserDTO(**attrs)
 
 class ProjectUserListDTOSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -58,3 +32,17 @@ class ProjectUserListDTOSerializer(serializers.Serializer):
             instance.users = attrs['users']
             return instance
         return ProjectUserListDTO(**attrs)
+
+
+class userListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.CharField()
+    roleId = serializers.IntegerField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.id = attrs['id']
+            instance.email = attrs['email']
+            instance.roleId = attrs['roleId']
+            return instance
+        return UserDTO(**attrs)
