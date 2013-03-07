@@ -1,4 +1,4 @@
-from main.models import User, User_Forgot_Password
+from main.models import *
 from rest_framework.response import Response
 import string, datetime, smtplib, random, hashlib
 
@@ -14,12 +14,20 @@ def responseJsonUtil(argSuccess, argErrorCode, argResult):
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
 
 
+# Build a Json Response with raw JSON element as argRawResult
+def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
+    if argRawResult == None:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
+    else:
+        return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
+
+
 # Validate if the user exists in DB
 def userAuthentication(request):
     try:
         tmpMail = request.META['HTTP_USERNAME']
         tmpPassword = request.META['HTTP_PASSWORD']
-        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
         return True;
     except User.DoesNotExist:
         return False;
@@ -102,3 +110,67 @@ def correctForgotPasswordToken(argEmail, argToken):
         return True
     except User_Forgot_Password.DoesNotExist:
         return False;
+
+
+# Validate if the group exists in DB
+def groupExists(argGroupID):
+    try:
+        Group.objects.get(id=argGroupID)
+        return True;
+    except Group.DoesNotExist:
+        return False;
+
+# Validate if the project exists in DB
+def projectExists(argProjectID):
+    try:
+        Project.objects.get(id=argProjectID)
+        return True;
+    except Project.DoesNotExist:
+        return False;
+
+
+# Validate if the user is group manager
+def userIsGroupAdmin(argRequest, argGroupID):
+    try:
+        tmpUser = getUserByRequest(argRequest)
+        tmpGroup = Group.objects.get(id=argGroupID)
+        tmpRole = Role.objects.get(id=1)
+        Group_User.objects.get(user=tmpUser,group=tmpGroup,role=tmpRole)
+        return True;
+    except Group_User.DoesNotExist:
+        return False;
+
+
+# Validate if the user is group member
+def userIsGroupMember(argRequest, argGroupID):
+    try:
+        tmpUser = getUserByRequest(argRequest)
+        tmpGroup = Group.objects.get(id=argGroupID)
+        Group_User.objects.get(user=tmpUser,group=tmpGroup)
+        return True;
+    except Group_User.DoesNotExist:
+        return False;
+
+
+# Validate if the user is Project member
+def userIsProjectMember(argRequest, argProjectID):
+    try:
+        tmpUser = getUserByRequest(argRequest)
+        tmpProject = Group.objects.get(id=argProjectID)
+        Project_User.objects.get(user=tmpUser,project=tmpProject)
+        return True;
+    except Project_User.DoesNotExist:
+        return False;
+
+
+# Validate if the user is Project member
+def userIsProjectMember(argRequest, argProjectID):
+    try:
+        tmpUser = getUserByRequest(argRequest)
+        tmpProject = Group.objects.get(id=argProjectID)
+        Project_User.objects.get(user=tmpUser,project=tmpProject)
+        return True;
+    except Project_User.DoesNotExist:
+        return False;
+
+

@@ -74,8 +74,8 @@ def createProjectListDTOObject(argProject, argUserList):
 # Save and update projects
 @api_view(['POST', 'PUT'])
 def saveProject(argRequest, format=None):
-    # if not userAuthentication(argRequest):
-    #     return responseJsonUtil(False, 'ERROR_100', None)
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False, 'ERROR_100', None)
 
     tmpData = JSONParser().parse(argRequest)
     if argRequest.method == 'POST':

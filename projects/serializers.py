@@ -1,13 +1,12 @@
 from rest_framework import serializers
-from main.models import Project
-from projects.dtos import ProjectUserListDTO, UserDTO
+from main.models import Project, Project_User
+from projects.dtos import ProjectUserDTO, ProjectUserListDTO
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('id', 'name', 'description', 'created', 'entity_status', 'group')
-        id = serializers.IntegerField(default=0)
+        fields = ('name', 'description', 'created', 'entity_status', 'group')
         name = serializers.CharField(required=True,max_length=30)
         description = serializers.CharField(required=True,max_length=250)
         created = serializers.CharField(required=True,max_length=250)
@@ -15,19 +14,31 @@ class ProjectSerializer(serializers.ModelSerializer):
         group = serializers.PrimaryKeyRelatedField()
 
 
-class userListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    email = serializers.CharField()
-    roleId = serializers.IntegerField()
+class ProjectUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project_User
+        fields = ('user', 'project', 'rol')
+        user = serializers.PrimaryKeyRelatedField()
+        project = serializers.PrimaryKeyRelatedField()
+        rol = serializers.PrimaryKeyRelatedField()
+
+
+class ProjectUserDTOSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    project_id = serializers.IntegerField()
+    role_id = serializers.IntegerField()
+    username = serializers.CharField()
+    rolename = serializers.CharField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
-            instance.id = attrs['id']
-            instance.email = attrs['email']
-            instance.roleId = attrs['roleId']
+            instance.user_id = attrs['user_id']
+            instance.group_id = attrs['group_id']
+            instance.role_id = attrs['role_id']
+            instance.username = attrs['username']
+            instance.rolename = attrs['rolename']
             return instance
-        return UserDTO(**attrs)
-
+        return ProjectUserDTO(**attrs)
 
 class ProjectUserListDTOSerializer(serializers.Serializer):
     id = serializers.IntegerField()
