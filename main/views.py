@@ -1,29 +1,32 @@
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
 from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
-from rest_framework.response import Response
-from rest_framework import status
-from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
-from main.serializers import UserSerializer, PermissionGroupDTOSerializer
 import json
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken, userAuthentication
 from rest_framework.parsers import JSONParser
-import json
 
-@api_view(['GET','POST'])
-def user_authentication(request, format=None):
 
-    try:
-        tmpMail = request.META['HTTP_USERNAME']
-        tmpPassword = request.META['HTTP_PASSWORD']
-        user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
-    except User.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR_100',  None)
+@api_view(['GET','POST','PUT'])
+def user_services(request, pk, format=None):
 
+    if not userAuthentication(request):
+        return responseJsonUtil(False, 'ERROR100',  None)
     if request.method == 'GET':
-        serializer = UserSerializer(user)
-        return responseJsonUtil(True, None, serializer)
+        return user_authentication(request)
+    if request.method == 'POST':
+        return register_user(request)
+    if request.method == 'PUT':
+        return update_user(request, pk)
+
+
+def user_authentication(request):
+
+    tmpMail = request.META['HTTP_USERNAME']
+    tmpPassword = request.META['HTTP_PASSWORD']
+    user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+    serializer = UserSerializer(user)
+    return responseJsonUtil(True, None, serializer)
 
 
 
@@ -89,27 +92,23 @@ def getUserByGroupAndProject(request, group, project):
         return responseJsonUtil(True, None, tmpSerializer)
 
 
-@api_view(['POST'])
-def register_user(request, format=None):
+def register_user(request):
 
-    if request.method == 'POST':
-        data = JSONParser().parse(request)
-        tmpUserSerializer = UserSerializer(data=data)
-        if tmpUserSerializer.is_valid():
-            tmpUserSerializer.save()
-            return responseJsonUtil(True, None, tmpUserSerializer)
-        else:
-            return responseJsonUtil(False, 'ERROR_101',  None)
+    data = JSONParser().parse(request)
+    tmpUserSerializer = UserSerializer(data=data)
+    if tmpUserSerializer.is_valid():
+        tmpUserSerializer.save()
+        return responseJsonUtil(True, None, tmpUserSerializer)
+    else:
+        return responseJsonUtil(False, 'ERROR_101',  None)
 
 
-@api_view(['PUT'])
 def update_user(request, pk, format=None):
 
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return responseJsonUtil(False, 404, None)
-
     data = JSONParser().parse(request)
     serializer = UserSerializer(user, data=data)
     if serializer.is_valid():
