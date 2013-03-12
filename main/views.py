@@ -19,15 +19,20 @@ def user_services(request, pk, format=None):
     if request.method == 'PUT':
         return update_user(request, pk)
 
+@api_view(['GET'])
+def user_authentication(request, format=None):
+    try:
+        tmpMail = request.META['HTTP_USERNAME']
+        tmpPassword = request.META['HTTP_PASSWORD']
+        user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+    except User.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR_100',  None)
 
-def user_authentication(request):
-
-    tmpMail = request.META['HTTP_USERNAME']
-    tmpPassword = request.META['HTTP_PASSWORD']
-    user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
-    serializer = UserSerializer(user)
-    return responseJsonUtil(True, None, serializer)
-
+    if request.method == 'GET':
+        if 'id' not in request.session:
+            request.session['id'] = md5Encoding(tokenGenerator(16))
+        serializer = UserSerializer(user)
+        return responseJsonUtil(True, None, serializer)
 
 
 @api_view(['GET'])
@@ -211,7 +216,3 @@ def resetPassword(request,email, token,  format=None):
                 return responseJsonUtil(False, 'ERROR002',  None)
         else:
             return responseJsonUtil(False, 'ERROR100',  None)
-
-
-
-

@@ -1,3 +1,4 @@
+from django.contrib.sessions.models import Session
 from main.models import *
 from rest_framework.response import Response
 import string, datetime, smtplib, random, hashlib
@@ -8,7 +9,7 @@ import string, datetime, smtplib, random, hashlib
 # error String
 # Collection of data
 def responseJsonUtil(argSuccess, argErrorCode, argResult):
-    if argResult == None:
+    if argResult is None:
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult})
     else:
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argResult.data})
@@ -16,7 +17,7 @@ def responseJsonUtil(argSuccess, argErrorCode, argResult):
 
 # Build a Json Response with raw JSON element as argRawResult
 def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
-    if argRawResult == None:
+    if argRawResult is None:
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
     else:
         return Response({'success': argSuccess, 'error': argErrorCode, 'result': argRawResult})
@@ -24,14 +25,12 @@ def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
 
 # Validate if the user exists in DB
 def userAuthentication(request):
-    try:
-        tmpMail = request.META['HTTP_USERNAME']
-        tmpPassword = request.META['HTTP_PASSWORD']
-        User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
-        return True;
-    except User.DoesNotExist:
-        return False;
-
+    if 'id' in request.session:
+        try:
+            tmpSession = Session.objects.get(session_key=request.session._session_key)
+            return True
+        except Session.DoesNotExist :
+            return False
 
 # return user filtering by request information
 def getUserByRequest(request):
@@ -39,9 +38,9 @@ def getUserByRequest(request):
         tmpMail = request.META['HTTP_USERNAME']
         tmpPassword = request.META['HTTP_PASSWORD']
         tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
-        return tmpUser;
+        return tmpUser
     except User.DoesNotExist:
-        return None;
+        return None
 
 # The format string which returns is ej: September 24 2010 17:03
 def dateToString(argDate):
@@ -54,10 +53,10 @@ def stringToDate(argString):
 
 
 # Retrieve a desired value from a List in a key-value format
-def getPropertyByName(argProperty,argData):
+def getPropertyByName(argProperty, argData):
 
     for key, value in argData:
-        if argProperty==key:
+        if argProperty == key:
             return value
 
 
@@ -96,9 +95,9 @@ def md5Encoding(argString):
 def emailExists(argEmail):
     try:
         tmpUser = User.objects.get(email=argEmail)
-        return True;
+        return True
     except User.DoesNotExist:
-        return False;
+        return False
 
 
 #
@@ -109,24 +108,24 @@ def correctForgotPasswordToken(argEmail, argToken):
         User_Forgot_Password.objects.get(user=tmpUser, token=argToken)
         return True
     except User_Forgot_Password.DoesNotExist:
-        return False;
+        return False
 
 
 # Validate if the group exists in DB
 def groupExists(argGroupID):
     try:
         Group.objects.get(id=argGroupID)
-        return True;
+        return True
     except Group.DoesNotExist:
-        return False;
+        return False
 
 # Validate if the project exists in DB
 def projectExists(argProjectID):
     try:
         Project.objects.get(id=argProjectID)
-        return True;
+        return True
     except Project.DoesNotExist:
-        return False;
+        return False
 
 
 # Validate if the user is group manager
@@ -136,9 +135,9 @@ def userIsGroupAdmin(argRequest, argGroupID):
         tmpGroup = Group.objects.get(id=argGroupID)
         tmpRole = Role.objects.get(id=1)
         Group_User.objects.get(user=tmpUser,group=tmpGroup,role=tmpRole)
-        return True;
+        return True
     except Group_User.DoesNotExist:
-        return False;
+        return False
 
 
 # Validate if the user is group member
@@ -147,9 +146,9 @@ def userIsGroupMember(argRequest, argGroupID):
         tmpUser = getUserByRequest(argRequest)
         tmpGroup = Group.objects.get(id=argGroupID)
         Group_User.objects.get(user=tmpUser,group=tmpGroup)
-        return True;
+        return True
     except Group_User.DoesNotExist:
-        return False;
+        return False
 
 
 # Validate if the user is Project member
@@ -158,9 +157,9 @@ def userIsProjectMember(argRequest, argProjectID):
         tmpUser = getUserByRequest(argRequest)
         tmpProject = Group.objects.get(id=argProjectID)
         Project_User.objects.get(user=tmpUser,project=tmpProject)
-        return True;
+        return True
     except Project_User.DoesNotExist:
-        return False;
+        return False
 
 
 # Validate if the user is Project member
@@ -169,8 +168,8 @@ def userIsProjectMember(argRequest, argProjectID):
         tmpUser = getUserByRequest(argRequest)
         tmpProject = Group.objects.get(id=argProjectID)
         Project_User.objects.get(user=tmpUser,project=tmpProject)
-        return True;
+        return True
     except Project_User.DoesNotExist:
-        return False;
+        return False
 
 
