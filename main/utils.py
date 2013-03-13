@@ -24,13 +24,14 @@ def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
 
 
 # Validate if the user exists in DB
-def userAuthentication(request):
-    if 'id' in request.session:
-        try:
-            tmpSession = Session.objects.get(session_key=request.session._session_key)
-            return True
-        except Session.DoesNotExist :
+def userAuthentication(argRequest):
+    try:
+        tmpSession = Session.objects.get(session_key=argRequest.session._session_key)
+        if tmpSession.expire_date.date() < datetime.datetime.now().date():
             return False
+        return True
+    except Session.DoesNotExist:
+        return False
 
 # return user filtering by request information
 def getUserByRequest(request):

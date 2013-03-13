@@ -3,8 +3,10 @@ from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDT
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 import json
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken, userAuthentication
+from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken
 from rest_framework.parsers import JSONParser
+from django.contrib.sessions.backends.db import SessionStore
+from rest_framework.response import Response
 
 
 @api_view(['GET','POST','PUT'])
@@ -19,20 +21,37 @@ def user_services(request, pk, format=None):
     if request.method == 'PUT':
         return update_user(request, pk)
 
+
 @api_view(['GET'])
-def user_authentication(request, format=None):
+def user_authentication(argRequest, format=None):
     try:
-        tmpMail = request.META['HTTP_USERNAME']
-        tmpPassword = request.META['HTTP_PASSWORD']
-        user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        tmpMail = argRequest.META['HTTP_USERNAME']
+        tmpPassword = argRequest.META['HTTP_PASSWORD']
+        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
     except User.DoesNotExist:
         return responseJsonUtil(False, 'ERROR_100',  None)
 
-    if request.method == 'GET':
-        if 'id' not in request.session:
-            request.session['id'] = md5Encoding(tokenGenerator(16))
-        serializer = UserSerializer(user)
-        return responseJsonUtil(True, None, serializer)
+    if argRequest.method == 'GET':
+
+        if 'id' not in argRequest.session:
+            tmpTokken = md5Encoding(tokenGenerator(16))
+            argRequest.session['id'] = tmpTokken
+            tmpSession = SessionStore()
+            tmpSession.save()
+            tmpSessionKey = tmpSession.session_key;
+            argRequest.session._session_key = tmpSessionKey
+            User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
+        tmpSerializer = UserSerializer(tmpUser)
+        return responseJsonUtil(True, None, tmpSerializer)
+
+@api_view(['GET'])
+def getUserAuth(argRequest, format=None):
+    if userAuthentication(argRequest):
+        tmpUser = User.objects.raw('Select * from main_user where session_key = \'' + argRequest.session.session_key +
+                                   '\'')
+        tmpSerializer = UserSerializer(tmpUser)
+        return responseJsonUtil(True, None, tmpSerializer)
+    return responseJsonUtil(False, 'ERROR_100',  None)
 
 
 @api_view(['GET'])
