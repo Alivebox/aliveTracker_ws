@@ -1,6 +1,3 @@
-from django.core import serializers
-from django.http import HttpResponse
-from main.models import Project, Group
 from main.models import Project, Group, Project_User, Role, User
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
 from rest_framework.decorators import api_view
@@ -36,7 +33,7 @@ def getProject(argRequest, argProjectID, format=None):
         tmpProject = Project.objects.get(id=argProjectID)
         tmpProjectSerializer = ProjectSerializer(tmpProject)
         cursor = connection.cursor()
-        cursor.execute('select muser.id as id, muser.email as email, mrole.id as roleId\
+        cursor.execute('select muser.id as id, muser.email as name, mrole.id as role\
         from main_project_user project_user inner join main_user muser on muser.id = project_user.user_id \
         inner join main_role mrole on project_user.role_id = mrole.id \
         where muser.entity_status = 0 and project_user.project_id = ' + str(argProjectID))
@@ -54,8 +51,8 @@ def convertUserRole(argUserRoleResult):
     tmpList = []
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
-                             email=tmpItem[1],
-                             roleId=tmpItem[2],)
+                             name=tmpItem[1],
+                             role=tmpItem[2],)
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
     return tmpList
