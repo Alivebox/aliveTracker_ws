@@ -6,7 +6,8 @@ from projects.dtos import ProjectUserListDTO, UserDTO
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('name', 'description', 'created', 'entity_status', 'group')
+        fields = ('id', 'name', 'description', 'created', 'entity_status', 'group')
+        id = serializers.IntegerField()
         name = serializers.CharField(required=True,max_length=30)
         description = serializers.CharField(required=True,max_length=250)
         created = serializers.CharField(required=True,max_length=250)

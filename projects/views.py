@@ -33,14 +33,14 @@ def getProject(argRequest, argProjectID, format=None):
         tmpProject = Project.objects.get(id=argProjectID)
         tmpProjectSerializer = ProjectSerializer(tmpProject)
         cursor = connection.cursor()
-        cursor.execute('select muser.id as id, muser.email as name, mrole.id as role\
+        cursor.execute('select muser.id as id, muser.email as name, mrole.name as role\
         from main_project_user project_user inner join main_user muser on muser.id = project_user.user_id \
         inner join main_role mrole on project_user.role_id = mrole.id \
         where muser.entity_status = 0 and project_user.project_id = ' + str(argProjectID))
         tmpResult = cursor.fetchall()
-        tmpUserSerializer = convertUserRole(tmpResult)
-        tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserSerializer)
         connection.close()
+        tmpUserSerializer = convertUserRole(tmpResult)
+        tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserSerializer, argProjectID)
         return responseJsonUtil(True, None, tmpProjectUserListSerializer)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR_500', None)
@@ -59,8 +59,8 @@ def convertUserRole(argUserRoleResult):
 
 
 # Creates a ProjectListDTO, Using the project model and the userList
-def createProjectListDTOObject(argProject, argUserList):
-    tmpProjectUserListDTO = ProjectUserListDTO(id=getPropertyByName('id', argProject.data.items()),
+def createProjectListDTOObject(argProject, argUserList, argProjectID):
+    tmpProjectUserListDTO = ProjectUserListDTO(id=argProjectID,
                                                name=getPropertyByName('name', argProject.data.items()),
                                                created=getPropertyByName('created', argProject.data.items()),
                                                description=getPropertyByName('description', argProject.data.items()),
