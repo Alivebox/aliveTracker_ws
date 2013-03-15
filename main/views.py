@@ -1,5 +1,5 @@
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
-from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer
+from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer, UserSerializerDTO
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 import json
 from rest_framework.decorators import api_view
@@ -22,16 +22,17 @@ def user_services(request, pk, format=None):
         return update_user(request, pk)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def user_authentication(argRequest, format=None):
     try:
-        tmpMail = argRequest.META['HTTP_USERNAME']
-        tmpPassword = argRequest.META['HTTP_PASSWORD']
-        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        tmpData = JSONParser().parse(argRequest)
+        tmpEmail = str(getPropertyByName('email', tmpData.items()))
+        tmpPassword = str(getPropertyByName('password', tmpData.items()))
+        tmpUser = User.objects.get(password=tmpPassword, email=tmpEmail, entity_status=0)
     except User.DoesNotExist:
         return responseJsonUtil(False, 'ERROR_100',  None)
 
-    if argRequest.method == 'GET':
+    if argRequest.method == 'POST':
 
         if 'id' not in argRequest.session:
             tmpTokken = md5Encoding(tokenGenerator(16))
@@ -41,7 +42,7 @@ def user_authentication(argRequest, format=None):
             tmpSessionKey = tmpSession.session_key;
             argRequest.session._session_key = tmpSessionKey
             User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
-        tmpSerializer = UserSerializer(tmpUser)
+        tmpSerializer = UserSerializerDTO(tmpUser)
         return responseJsonUtil(True, None, tmpSerializer)
 
 @api_view(['GET'])

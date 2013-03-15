@@ -9,3 +9,10 @@ class UserDTO(object):
         self.user_id = user_id
         self.email = email
         self.role_id = role_id
+
+
+class UserLoginDTO(object):
+    def __init__(self, id, email, name):
+        self.id = id
+        self.email = email
+        self.name = name
