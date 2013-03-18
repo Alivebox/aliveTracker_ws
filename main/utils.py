@@ -33,12 +33,11 @@ def userAuthentication(argRequest):
     except Session.DoesNotExist:
         return False
 
+
 # return user filtering by request information
-def getUserByRequest(request):
+def getUserByRequest(argRequest):
     try:
-        tmpMail = request.META['HTTP_USERNAME']
-        tmpPassword = request.META['HTTP_PASSWORD']
-        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        tmpUser = User.objects.get(session_key=argRequest.session._session_key)
         return tmpUser
     except User.DoesNotExist:
         return None
