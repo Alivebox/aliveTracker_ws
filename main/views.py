@@ -1,10 +1,12 @@
 from os import tmpnam
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Group, Role
-from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer, UserSerializerDTO, RoleSerializer
+from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer, UserSerializerDTO, \
+    RoleSerializer
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 import json
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken
+from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, \
+    correctForgotPasswordToken
 from rest_framework.parsers import JSONParser
 from django.contrib.sessions.backends.db import SessionStore
 
@@ -240,8 +242,8 @@ def resetPassword(request,email, token,  format=None):
 
 @api_view(['GET'])
 def getRoles(argRequest):
-    if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR100',  None)
+    #if not userAuthentication(argRequest):
+     #   return responseJsonUtil(False, 'ERROR100',  None)
     try:
         tmpRoles = Role.objects.all()
         tmpRolesSerializer = RoleSerializer(tmpRoles)

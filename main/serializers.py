@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from main.models import User, Group_User
+from main.models import User, Group_User, Role
 from main.dtos import PermissionGroupDTO, UserDTO, UserLoginDTO
 
 
@@ -98,3 +98,23 @@ class UserForgotPasswordSerializer(serializers.Serializer):
             instance.token = attrs['token']
             return instance
         return UserForgotPasswordSerializer(**attrs)
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+    fields = ('id', 'name', 'description', 'entity_status')
+    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
+    name = serializers.CharField(required=True,max_length=50)
+    description = serializers.CharField(max_length=50)
+    entity_status = serializers.IntegerField(default=0)
+
+    def restore_object(self, attrs, instance=None):
+        if instance:
+            instance.name = attrs.get('name', instance.name)
+            instance.description = attrs.get('description', instance.email)
+            instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            return instance
+
+        # Create new instance
+        return Role(**attrs)
