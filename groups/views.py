@@ -15,12 +15,16 @@ def groupsServices(argRequest, format=None):
         if argRequest.method == 'POST':
             try:
                 tmpData = JSONParser().parse(argRequest)
-                tmpNewGroup = Group.objects.create(pk=5,
-                                                   name=getPropertyByName('name', tmpData.items()),
+                tmpNewGroup = Group.objects.create(name=getPropertyByName('name', tmpData.items()),
                                                    description=getPropertyByName('description', tmpData.items()),
                                                    logo_url=getPropertyByName('logo_url', tmpData.items()),
                                                    web_site_url=getPropertyByName('web_site_url', tmpData.items()),
                                                    created=date.today())
+
+                tmpUser = getUserByRequest(argRequest)
+                Group_User.objects.create(user=tmpUser,
+                                          group=tmpNewGroup,
+                                          role=getAdminRole())
                 tmpSerializer = GroupSerializer(tmpNewGroup)
                 return responseJsonUtil(True, None, tmpSerializer)
             except BaseException:
@@ -63,7 +67,7 @@ def getGroupsByUser(request, format=None):
     else:
         return responseJsonUtil(False, 'ERROR100', None)
 
-
+@api_view(['DELETE'])
 def deleteGroupProcess(argRequest, argGroupID):
     if userIsGroupAdmin(argRequest, argGroupID):
         try:
