@@ -63,7 +63,7 @@ def getGroupsByUser(request, format=None):
                 data = {'myGroups': tmpMyGroupsSerializer.data, 'belongToGroups': tmpBelongToGroupsSerializer.data}
                 return rawResponseJsonUtil(True, None, data)
             except User.DoesNotExist:
-                return responseJsonUtil(False, 'ERROR000', None)
+                return responseJsonUtil(False, 'ERROR400', None)
     else:
         return responseJsonUtil(False, 'ERROR100', None)
 

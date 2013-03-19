@@ -31,33 +31,40 @@ def user_authentication(argRequest, format=None):
         tmpEmail = str(getPropertyByName('email', tmpData.items()))
         tmpPassword = str(getPropertyByName('password', tmpData.items()))
         tmpUser = User.objects.get(password=tmpPassword, email=tmpEmail, entity_status=0)
+
+
+        if argRequest.method == 'POST':
+
+            if 'id' not in argRequest.session:
+                tmpTokken = md5Encoding(tokenGenerator(16))
+                argRequest.session['id'] = tmpTokken
+                tmpSession = SessionStore()
+                tmpSession.save()
+                tmpSessionKey = tmpSession.session_key;
+                argRequest.session._session_key = tmpSessionKey
+                User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
+            else:
+                User.objects.filter(pk=tmpUser.id).update(session_key=argRequest.session._session_key)
+
+            tmpSerializer = UserSerializerDTO(tmpUser)
+            return responseJsonUtil(True, None, tmpSerializer)
     except User.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR_100',  None)
+        return responseJsonUtil(False, 'ERROR100',  None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
 
-    if argRequest.method == 'POST':
-
-        if 'id' not in argRequest.session:
-            tmpTokken = md5Encoding(tokenGenerator(16))
-            argRequest.session['id'] = tmpTokken
-            tmpSession = SessionStore()
-            tmpSession.save()
-            tmpSessionKey = tmpSession.session_key;
-            argRequest.session._session_key = tmpSessionKey
-            User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
-        else:
-            User.objects.filter(pk=tmpUser.id).update(session_key=argRequest.session._session_key)
-
-        tmpSerializer = UserSerializerDTO(tmpUser)
-        return responseJsonUtil(True, None, tmpSerializer)
 
 @api_view(['GET'])
 def getUserAuth(argRequest, format=None):
-    if userAuthentication(argRequest):
-        tmpUser = User.objects.raw('Select * from main_user where session_key = \'' + argRequest.session.session_key +
-                                   '\'')
-        tmpSerializer = UserSerializer(tmpUser)
-        return responseJsonUtil(True, None, tmpSerializer)
-    return responseJsonUtil(False, 'ERROR_100',  None)
+    try:
+        if userAuthentication(argRequest):
+            tmpUser = User.objects.raw('Select * from main_user where session_key = \'' + argRequest.session.session_key +
+                                       '\'')
+            tmpSerializer = UserSerializer(tmpUser)
+            return responseJsonUtil(True, None, tmpSerializer)
+        return responseJsonUtil(False, 'ERROR100',  None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
 
 
 @api_view(['GET'])
@@ -68,12 +75,12 @@ def user_permissions(request, pk, format=None):
         tmpPassword = request.META['HTTP_PASSWORD']
         tmpGroup = Group.objects.get(pk=pk, entity_status=0)
         tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        serializer = getGroupPermissionsByUser(tmpUser, tmpGroup)
+        return responseJsonUtil(True, None, serializer)
     except User.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR_100',  None)
+        return responseJsonUtil(False, 'ERROR100',  None)
     except Group.DoesNotExist:
-        return responseJsonUtil(False, "ERROR_200", None)
-    serializer = getGroupPermissionsByUser(tmpUser, tmpGroup)
-    return responseJsonUtil(True, None, serializer)
+        return responseJsonUtil(False, "ERROR200", None)
 
 
 def getGroupPermissionsByUser(argUser, argGroup):
@@ -130,7 +137,7 @@ def register_user(request):
         tmpUserSerializer.save()
         return responseJsonUtil(True, None, tmpUserSerializer)
     else:
-        return responseJsonUtil(False, 'ERROR_101',  None)
+        return responseJsonUtil(False, 'ERROR101',  None)
 
 
 def update_user(request, pk, format=None):
@@ -150,20 +157,22 @@ def update_user(request, pk, format=None):
 
 @api_view(['GET'])
 def getUsers(request, format=None):
-
-    if not userAuthentication(request):
-        return responseJsonUtil(False, 'ERROR_100',  None)
-    tmpQUERY = request.QUERY_PARAMS
-    limit = int(tmpQUERY['limit'])
-    tmpFilter = tmpQUERY['filter']
-    filtersList = buildFilters(tmpFilter)
-    filter = filtersList[0]
-    tmpValue = filter["value"]
-    tmpValue = tmpValue.replace("%", "")
-    tmpProperty = filter["property"]
-    tmpResultQuery = User.objects.filter(name__icontains=tmpValue)[:limit]
-    serializer = UserSerializer(tmpResultQuery)
-    return responseJsonUtil(True, None, serializer)
+    try:
+        if not userAuthentication(request):
+            return responseJsonUtil(False, 'ERROR100',  None)
+        tmpQUERY = request.QUERY_PARAMS
+        limit = int(tmpQUERY['limit'])
+        tmpFilter = tmpQUERY['filter']
+        filtersList = buildFilters(tmpFilter)
+        filter = filtersList[0]
+        tmpValue = filter["value"]
+        tmpValue = tmpValue.replace("%", "")
+        tmpProperty = filter["property"]
+        tmpResultQuery = User.objects.filter(name__icontains=tmpValue)[:limit]
+        serializer = UserSerializer(tmpResultQuery)
+        return responseJsonUtil(True, None, serializer)
+    except Group.DoesNotExist:
+        return responseJsonUtil(False, "ERROR200", None)
 
 
 def buildFilters(argFilterQueryObject):
