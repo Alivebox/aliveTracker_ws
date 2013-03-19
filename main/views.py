@@ -44,6 +44,9 @@ def user_authentication(argRequest, format=None):
             tmpSessionKey = tmpSession.session_key;
             argRequest.session._session_key = tmpSessionKey
             User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
+        else:
+            User.objects.filter(pk=tmpUser.id).update(session_key=argRequest.session._session_key)
+
         tmpSerializer = UserSerializerDTO(tmpUser)
         return responseJsonUtil(True, None, tmpSerializer)
 
