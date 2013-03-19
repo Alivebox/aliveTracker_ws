@@ -6,7 +6,8 @@ from projects.dtos import ProjectUserListDTO, UserDTO
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ('name', 'description', 'created', 'entity_status', 'group')
+        fields = ('id', 'name', 'description', 'created', 'entity_status', 'group')
+        id = serializers.IntegerField()
         name = serializers.CharField(required=True,max_length=30)
         description = serializers.CharField(required=True,max_length=250)
         created = serializers.CharField(required=True,max_length=250)
@@ -36,13 +37,13 @@ class ProjectUserListDTOSerializer(serializers.Serializer):
 
 class userListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    email = serializers.CharField()
-    roleId = serializers.IntegerField()
+    name = serializers.CharField()
+    role = serializers.CharField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             instance.id = attrs['id']
-            instance.email = attrs['email']
-            instance.roleId = attrs['roleId']
+            instance.name = attrs['name']
+            instance.role = attrs['role']
             return instance
         return UserDTO(**attrs)

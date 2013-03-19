@@ -1,12 +1,11 @@
 from main.models import Project, Group, Project_User, Role, User
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
+from main.utils import responseJsonUtil, userAuthentication, getPropertyByName, getUserByRequest
 from rest_framework.parsers import JSONParser
 from projects.deserializers import projectDeserializer
 from projects.dtos import ProjectUserListDTO, UserDTO
 from django.db import connection, transaction
-
 
 # Returns users who belongs to the respective ID
 @api_view(['GET'])
@@ -14,12 +13,11 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
         return responseJsonUtil(False, 'ERROR_100', None)
     try:
-        tmpMail = argRequest.META['HTTP_USERNAME']
+        tmpMail = getUserByRequest(argRequest).email
         tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
         from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id \
         inner join main_project mproject on project_user.project_id = mproject.id \
-        where muser.entity_status = 0 and muser.email= "' +
-        str(tmpMail) + '" and mproject.group_id = ' + str(argGroupID))
+        where muser.entity_status = 0 and muser.email= \'' + str(tmpMail) + '\' and mproject.group_id = ' + str(argGroupID))
         serializer = ProjectSerializer(tmpResult)
         return responseJsonUtil(True, None, serializer)
     except BaseException:
@@ -35,14 +33,14 @@ def getProject(argRequest, argProjectID, format=None):
         tmpProject = Project.objects.get(id=argProjectID)
         tmpProjectSerializer = ProjectSerializer(tmpProject)
         cursor = connection.cursor()
-        cursor.execute('select muser.id as id, muser.email as email, mrole.id as roleId\
+        cursor.execute('select muser.id as id, muser.email as name, mrole.name as role\
         from main_project_user project_user inner join main_user muser on muser.id = project_user.user_id \
         inner join main_role mrole on project_user.role_id = mrole.id \
-        where .entity_status = 0 and project_user.project_id = ' + str(argProjectID))
+        where muser.entity_status = 0 and project_user.project_id = ' + str(argProjectID))
         tmpResult = cursor.fetchall()
-        tmpUserSerializer = convertUserRole(tmpResult)
-        tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserSerializer)
         connection.close()
+        tmpUserSerializer = convertUserRole(tmpResult)
+        tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserSerializer, argProjectID)
         return responseJsonUtil(True, None, tmpProjectUserListSerializer)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR_500', None)
@@ -53,16 +51,16 @@ def convertUserRole(argUserRoleResult):
     tmpList = []
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
-                             email=tmpItem[1],
-                             roleId=tmpItem[2],)
+                             name=tmpItem[1],
+                             role=tmpItem[2],)
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
     return tmpList
 
 
 # Creates a ProjectListDTO, Using the project model and the userList
-def createProjectListDTOObject(argProject, argUserList):
-    tmpProjectUserListDTO = ProjectUserListDTO(id=getPropertyByName('id', argProject.data.items()),
+def createProjectListDTOObject(argProject, argUserList, argProjectID):
+    tmpProjectUserListDTO = ProjectUserListDTO(id=argProjectID,
                                                name=getPropertyByName('name', argProject.data.items()),
                                                created=getPropertyByName('created', argProject.data.items()),
                                                description=getPropertyByName('description', argProject.data.items()),

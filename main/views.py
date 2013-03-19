@@ -1,10 +1,14 @@
-from main.models import User, Group_User, Project_User, User_Forgot_Password, Group
-from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer
+from os import tmpnam
+from main.models import User, Group_User, Project_User, User_Forgot_Password, Group, Role
+from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer, UserSerializerDTO, \
+    RoleSerializer
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 import json
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, correctForgotPasswordToken, userAuthentication
+from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, \
+    correctForgotPasswordToken
 from rest_framework.parsers import JSONParser
+from django.contrib.sessions.backends.db import SessionStore
 
 
 @api_view(['GET','POST','PUT'])
@@ -20,14 +24,40 @@ def user_services(request, pk, format=None):
         return update_user(request, pk)
 
 
-def user_authentication(request):
+@api_view(['POST'])
+def user_authentication(argRequest, format=None):
+    try:
+        tmpData = JSONParser().parse(argRequest)
+        tmpEmail = str(getPropertyByName('email', tmpData.items()))
+        tmpPassword = str(getPropertyByName('password', tmpData.items()))
+        tmpUser = User.objects.get(password=tmpPassword, email=tmpEmail, entity_status=0)
+    except User.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR_100',  None)
 
-    tmpMail = request.META['HTTP_USERNAME']
-    tmpPassword = request.META['HTTP_PASSWORD']
-    user = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
-    serializer = UserSerializer(user)
-    return responseJsonUtil(True, None, serializer)
+    if argRequest.method == 'POST':
 
+        if 'id' not in argRequest.session:
+            tmpTokken = md5Encoding(tokenGenerator(16))
+            argRequest.session['id'] = tmpTokken
+            tmpSession = SessionStore()
+            tmpSession.save()
+            tmpSessionKey = tmpSession.session_key;
+            argRequest.session._session_key = tmpSessionKey
+            User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
+        else:
+            User.objects.filter(pk=tmpUser.id).update(session_key=argRequest.session._session_key)
+
+        tmpSerializer = UserSerializerDTO(tmpUser)
+        return responseJsonUtil(True, None, tmpSerializer)
+
+@api_view(['GET'])
+def getUserAuth(argRequest, format=None):
+    if userAuthentication(argRequest):
+        tmpUser = User.objects.raw('Select * from main_user where session_key = \'' + argRequest.session.session_key +
+                                   '\'')
+        tmpSerializer = UserSerializer(tmpUser)
+        return responseJsonUtil(True, None, tmpSerializer)
+    return responseJsonUtil(False, 'ERROR_100',  None)
 
 
 @api_view(['GET'])
@@ -213,5 +243,13 @@ def resetPassword(request,email, token,  format=None):
             return responseJsonUtil(False, 'ERROR100',  None)
 
 
-
-
+@api_view(['GET'])
+def getRoles(argRequest):
+    #if not userAuthentication(argRequest):
+     #   return responseJsonUtil(False, 'ERROR100',  None)
+    try:
+        tmpRoles = Role.objects.all()
+        tmpRolesSerializer = RoleSerializer(tmpRoles)
+        return responseJsonUtil(True, None, tmpRolesSerializer)
+    except Role.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR600',  None)

@@ -1,31 +1,39 @@
 from rest_framework import serializers
-from main.models import User, Group_User
-from main.dtos import PermissionGroupDTO, UserDTO
+from main.models import User, Group_User, Role
+from main.dtos import PermissionGroupDTO, UserDTO, UserLoginDTO
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-    fields = ('id', 'name', 'email', 'password', 'entity_status')
+    fields = ('id', 'name', 'email', 'entity_status')
     pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
     name = serializers.CharField(required=True,max_length=50)
     email = serializers.CharField(max_length=50)
-    password = serializers.CharField(required=True, max_length=128)
     entity_status = serializers.IntegerField(default=0)
 
     def restore_object(self, attrs, instance=None):
-        """
-        Create or update a new snippet instance.
-        """
         if instance:
-            # Update existing instance
             instance.name = attrs.get('name', instance.name)
             instance.email = attrs.get('email', instance.email)
-            instance.password = attrs.get('password', instance.password)
             instance.entity_status = attrs.get('entity_status', instance.entity_status)
             return instance
 
         # Create new instance
         return User(**attrs)
+
+class UserSerializerDTO(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.CharField()
+    name = serializers.CharField()
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            instance.id = attrs['id']
+            instance.email = attrs['email']
+            instance.name = attrs['name']
+            return instance
+        return UserLoginDTO(**attrs)
 
 
 class GroupUserSerializer(serializers.ModelSerializer):
@@ -90,3 +98,23 @@ class UserForgotPasswordSerializer(serializers.Serializer):
             instance.token = attrs['token']
             return instance
         return UserForgotPasswordSerializer(**attrs)
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+    fields = ('id', 'name', 'description', 'entity_status')
+    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
+    name = serializers.CharField(required=True,max_length=50)
+    description = serializers.CharField(max_length=50)
+    entity_status = serializers.IntegerField(default=0)
+
+    def restore_object(self, attrs, instance=None):
+        if instance:
+            instance.name = attrs.get('name', instance.name)
+            instance.description = attrs.get('description', instance.email)
+            instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            return instance
+
+        # Create new instance
+        return Role(**attrs)
