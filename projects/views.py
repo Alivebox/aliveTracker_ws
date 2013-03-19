@@ -1,3 +1,4 @@
+from datetime import date
 from main.models import Project, Group, Project_User, Role, User
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
 from rest_framework.decorators import api_view
@@ -78,7 +79,7 @@ def createProjectListDTOObject(argProject, argUserList, argProjectID):
 
 # Save and update projects
 @api_view(['POST', 'PUT'])
-def saveProject(argRequest, format=None):
+def saveProject(argRequest, argGroupId, format=None):
     try:
         if not userAuthentication(argRequest):
             return responseJsonUtil(False, 'ERROR103', None)
@@ -93,8 +94,8 @@ def saveProject(argRequest, format=None):
             Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
                 name=getPropertyByName('name', tmpData.items()),
                 description=getPropertyByName('description', tmpData.items()),
-                created=getPropertyByName('created', tmpData.items()),
-                group=Group.objects.get(pk=getPropertyByName('group', tmpData.items())))
+                created=date.today(),
+                group=Group.objects.get(pk=argGroupId))
             return responseJsonUtil(True, None, None)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR500', None)
