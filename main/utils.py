@@ -1,6 +1,7 @@
 from django.contrib.sessions.models import Session
 from main.models import *
 from rest_framework.response import Response
+from datetime import datetime
 import string, datetime, smtplib, random, hashlib
 
 
@@ -33,12 +34,11 @@ def userAuthentication(argRequest):
     except Session.DoesNotExist:
         return False
 
+
 # return user filtering by request information
-def getUserByRequest(request):
+def getUserByRequest(argRequest):
     try:
-        tmpMail = request.META['HTTP_USERNAME']
-        tmpPassword = request.META['HTTP_PASSWORD']
-        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        tmpUser = User.objects.get(session_key=argRequest.session._session_key)
         return tmpUser
     except User.DoesNotExist:
         return None
@@ -167,10 +167,12 @@ def userIsProjectMember(argRequest, argProjectID):
 def userIsProjectMember(argRequest, argProjectID):
     try:
         tmpUser = getUserByRequest(argRequest)
-        tmpProject = Group.objects.get(id=argProjectID)
+        tmpProject = Project.objects.get(id=argProjectID)
         Project_User.objects.get(user=tmpUser,project=tmpProject)
         return True
     except Project_User.DoesNotExist:
         return False
 
-
+def convertDateFromDatePicker(argStringDate):
+    tmpCleanString = argStringDate[:10]
+    return tmpCleanString

@@ -1,7 +1,7 @@
 from main.models import Project, Group, Project_User, Role, User
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
 from rest_framework.decorators import api_view
-from main.utils import responseJsonUtil, userAuthentication, getPropertyByName
+from main.utils import responseJsonUtil, userAuthentication, getPropertyByName, getUserByRequest
 from rest_framework.parsers import JSONParser
 from projects.deserializers import projectDeserializer
 from projects.dtos import ProjectUserListDTO, UserDTO
@@ -13,7 +13,7 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
         return responseJsonUtil(False, 'ERROR_100', None)
     try:
-        tmpMail = argRequest.META['HTTP_USERNAME']
+        tmpMail = getUserByRequest(argRequest).email
         tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
         from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id \
         inner join main_project mproject on project_user.project_id = mproject.id \

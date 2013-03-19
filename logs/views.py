@@ -28,7 +28,8 @@ def myLogsServices(request, group, format=None):
         data = JSONParser().parse(request)
         tmpActivities = getPropertyByName('activities', data.items())
         tmpGroup = getPropertyByName('group', data.items())
-        tmpDate = getPropertyByName('date', data.items())
+        tmpDate = convertDateFromDatePicker(getPropertyByName('date', data.items()))
+        tmpUser = getUserByRequest(request);
 
         with transaction.commit_on_success():
             deleteLog(getUserByRequest(request).id, tmpGroup, tmpDate)
@@ -37,7 +38,7 @@ def myLogsServices(request, group, format=None):
                 if tmpErrorName:
                     transaction.rollback()
                     return responseJsonUtil(False, tmpErrorName,  None)
-                tmpLog = logDeserializer(tmpObject)
+                tmpLog = logDeserializer(tmpObject, tmpUser, tmpDate)
                 tmpLog.save()
             return responseJsonUtil(True, None, None)
         return responseJsonUtil(False, None, None)
