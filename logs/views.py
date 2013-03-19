@@ -11,7 +11,7 @@ from rest_framework.decorators import api_view
 def myLogsServices(request, group, format=None):
 
     if not userAuthentication(request):
-        return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR103',  None)
 
     if request.method == 'GET':
         if not groupExists(group):
@@ -80,7 +80,7 @@ def exportReport(request, format=None):
             reportBook = buildReport(tmpGroupID, tmpProjectID, tmpUserID,tmpDateRangeId,tmpStartDate,tmpEndDate)
             return buildExcelFileResponse('logReport.xls', reportBook)
     else:
-        return responseJsonUtil(False, 'ERROR100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
 
 
 def exportReportPermissionsValidation(argGroupID,argProjectID,argUserID):

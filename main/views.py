@@ -15,7 +15,7 @@ from django.contrib.sessions.backends.db import SessionStore
 def user_services(request, pk, format=None):
 
     if not userAuthentication(request):
-        return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR103',  None)
     if request.method == 'GET':
         return user_authentication(request)
     if request.method == 'POST':
@@ -49,7 +49,7 @@ def user_authentication(argRequest, format=None):
             tmpSerializer = UserSerializerDTO(tmpUser)
             return responseJsonUtil(True, None, tmpSerializer)
     except User.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR400',  None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
@@ -62,7 +62,7 @@ def getUserAuth(argRequest, format=None):
                                        '\'')
             tmpSerializer = UserSerializer(tmpUser)
             return responseJsonUtil(True, None, tmpSerializer)
-        return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR103',  None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
@@ -113,7 +113,7 @@ def getProjectPermissionsByUser(argUser, argProject):
 @api_view(['GET'])
 def getUserByGroupAndProject(request, group, project):
     if not userAuthentication(request):
-        return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR103',  None)
     if not groupExists(group):
         return responseJsonUtil(False, 'ERROR200',  None)
     if not projectExists(project):
@@ -159,7 +159,7 @@ def update_user(request, pk, format=None):
 def getUsers(request, format=None):
     try:
         if not userAuthentication(request):
-            return responseJsonUtil(False, 'ERROR100',  None)
+            return responseJsonUtil(False, 'ERROR103',  None)
         tmpQUERY = request.QUERY_PARAMS
         limit = int(tmpQUERY['limit'])
         tmpFilter = tmpQUERY['filter']

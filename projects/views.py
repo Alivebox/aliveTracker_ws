@@ -11,7 +11,7 @@ from django.db import connection, transaction
 @api_view(['GET'])
 def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
     try:
         tmpMail = getUserByRequest(argRequest).email
         tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
@@ -32,7 +32,7 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
 @api_view(['GET'])
 def getProject(argRequest, argProjectID, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
     try:
         tmpProject = Project.objects.get(id=argProjectID)
         tmpProjectSerializer = ProjectSerializer(tmpProject)
@@ -81,7 +81,7 @@ def createProjectListDTOObject(argProject, argUserList, argProjectID):
 def saveProject(argRequest, format=None):
     try:
         if not userAuthentication(argRequest):
-            return responseJsonUtil(False, 'ERROR100', None)
+            return responseJsonUtil(False, 'ERROR103', None)
 
         tmpData = JSONParser().parse(argRequest)
         if argRequest.method == 'POST':
@@ -133,7 +133,7 @@ def insertProjectUsers(argProjectUsers):
 def deleteProject(argRequest, argId, format=None):
     try:
         if not userAuthentication(argRequest):
-            return responseJsonUtil(False, 'ERROR10', None)
+            return responseJsonUtil(False, 'ERROR103', None)
 
         if argRequest.method == 'DELETE':
             Project.objects.filter(id=argId).update(entity_status=1)
