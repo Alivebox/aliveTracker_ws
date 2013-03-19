@@ -7,7 +7,7 @@ from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 
-@api_view(['GET','POST',])
+@api_view(['GET','POST'])
 def myLogsServices(request, group, format=None):
 
     if not userAuthentication(request):
