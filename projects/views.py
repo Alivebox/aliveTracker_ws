@@ -86,9 +86,12 @@ def saveProject(argRequest, argGroupId, format=None):
 
         tmpData = JSONParser().parse(argRequest)
         if argRequest.method == 'POST':
-            tmpProject = projectDeserializer(tmpData)
-            tmpProject.save()
-            updateUserListInProject(tmpData)
+            tmpNewProject = Project.objects.create(name=getPropertyByName('name', tmpData.items()),
+                                 description=getPropertyByName('description', tmpData.items()),
+                                 created=date.today(),
+                                 entity_status=0,
+                                 group=Group.objects.get(pk=argGroupId))
+            updateUserListInProject(tmpData, tmpNewProject.id)
             return responseJsonUtil(True, None, None)
         if argRequest.method == 'PUT':
             Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
@@ -104,10 +107,9 @@ def saveProject(argRequest, argGroupId, format=None):
 
 
 # Update all users that belong to a project
-def updateUserListInProject(argData):
-    tmpProjectId = getPropertyByName('id', argData.items())
-    deleteUsersBelongProject(tmpProjectId)
-    insertProjectUsers(argData)
+def updateUserListInProject(argData, argProjectID):
+    deleteUsersBelongProject(argProjectID)
+    insertProjectUsers(argData, argProjectID)
 
 
 # Delete all users that belong to a project
@@ -119,13 +121,12 @@ def deleteUsersBelongProject(argProjectId):
 
 
 # Insert project_user
-def insertProjectUsers(argProjectUsers):
+def insertProjectUsers(argProjectUsers, argProjectID):
     tmpList = getPropertyByName('users', argProjectUsers.items())
-    tmpProjectId = getPropertyByName('id', argProjectUsers.items())
-    for tmpProjectUser in tmpList:
-        Project_User.objects.create(user=User.objects.get(pk=getPropertyByName('id', tmpProjectUser.items())),
-                                    project=Project.objects.get(pk=tmpProjectId),
-                                    role=Role.objects.get(pk=getPropertyByName('roleId', tmpProjectUser.items())))
+    for tmpCont in range(len(tmpList)) :
+        Project_User.objects.create(user=User.objects.get(pk=getPropertyByName('id', tmpList[tmpCont].items())),
+                                    project=Project.objects.get(pk=argProjectID),
+                                    role=Role.objects.get(name=getPropertyByName('role', tmpList[tmpCont].items())))
 
 
 
