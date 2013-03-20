@@ -1,3 +1,4 @@
+from datetime import date
 from main.models import Project, Group, Project_User, Role, User
 from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer, userListSerializer
 from rest_framework.decorators import api_view
@@ -11,7 +12,7 @@ from django.db import connection, transaction
 @api_view(['GET'])
 def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
     try:
         tmpMail = getUserByRequest(argRequest).email
         tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
@@ -20,15 +21,19 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
         where muser.entity_status = 0 and muser.email= \'' + str(tmpMail) + '\' and mproject.group_id = ' + str(argGroupID))
         serializer = ProjectSerializer(tmpResult)
         return responseJsonUtil(True, None, serializer)
+    except User.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR400', None)
+    except Project.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR500', None)
     except BaseException:
-        return responseJsonUtil(False, 'ERROR_500', None)
+        return responseJsonUtil(False, 'ERROR000', None)
 
 
 # Returns users who belongs to the respective ID
 @api_view(['GET'])
 def getProject(argRequest, argProjectID, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
     try:
         tmpProject = Project.objects.get(id=argProjectID)
         tmpProjectSerializer = ProjectSerializer(tmpProject)
@@ -43,7 +48,9 @@ def getProject(argRequest, argProjectID, format=None):
         tmpProjectUserListSerializer = createProjectListDTOObject(tmpProjectSerializer, tmpUserSerializer, argProjectID)
         return responseJsonUtil(True, None, tmpProjectUserListSerializer)
     except Project.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR_500', None)
+        return responseJsonUtil(False, 'ERROR500', None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
 
 
 # Get the query result to serialize
@@ -72,23 +79,28 @@ def createProjectListDTOObject(argProject, argUserList, argProjectID):
 
 # Save and update projects
 @api_view(['POST', 'PUT'])
-def saveProject(argRequest, format=None):
-    if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_100', None)
+def saveProject(argRequest, argGroupId, format=None):
+    try:
+        if not userAuthentication(argRequest):
+            return responseJsonUtil(False, 'ERROR103', None)
 
-    tmpData = JSONParser().parse(argRequest)
-    if argRequest.method == 'POST':
-        tmpProject = projectDeserializer(tmpData)
-        tmpProject.save()
-        updateUserListInProject(tmpData)
-        return responseJsonUtil(True, None, None)
-    if argRequest.method == 'PUT':
-        Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
-            name=getPropertyByName('name', tmpData.items()),
-            description=getPropertyByName('description', tmpData.items()),
-            created=getPropertyByName('created', tmpData.items()),
-            group=Group.objects.get(pk=getPropertyByName('group', tmpData.items())))
-        return responseJsonUtil(True, None, None)
+        tmpData = JSONParser().parse(argRequest)
+        if argRequest.method == 'POST':
+            tmpProject = projectDeserializer(tmpData)
+            tmpProject.save()
+            updateUserListInProject(tmpData)
+            return responseJsonUtil(True, None, None)
+        if argRequest.method == 'PUT':
+            Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
+                name=getPropertyByName('name', tmpData.items()),
+                description=getPropertyByName('description', tmpData.items()),
+                created=date.today(),
+                group=Group.objects.get(pk=argGroupId))
+            return responseJsonUtil(True, None, None)
+    except Project.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR500', None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
 
 
 # Update all users that belong to a project
@@ -120,11 +132,16 @@ def insertProjectUsers(argProjectUsers):
 # Creates a Project_User Model to be save into the project
 @api_view(['DELETE'])
 def deleteProject(argRequest, argId, format=None):
-    if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR_10', None)
+    try:
+        if not userAuthentication(argRequest):
+            return responseJsonUtil(False, 'ERROR103', None)
 
-    if argRequest.method == 'DELETE':
-        Project.objects.filter(id=argId).update(entity_status=1)
-        tmpProject = Project.objects.filter(id=argId)
-        tmpSerializer = ProjectSerializer(tmpProject)
-        return responseJsonUtil(True, None, tmpSerializer)
+        if argRequest.method == 'DELETE':
+            Project.objects.filter(id=argId).update(entity_status=1)
+            tmpProject = Project.objects.filter(id=argId)
+            tmpSerializer = ProjectSerializer(tmpProject)
+            return responseJsonUtil(True, None, tmpSerializer)
+    except Project.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR500', None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)

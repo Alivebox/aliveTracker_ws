@@ -15,12 +15,16 @@ def groupsServices(argRequest, format=None):
         if argRequest.method == 'POST':
             try:
                 tmpData = JSONParser().parse(argRequest)
-                tmpNewGroup = Group.objects.create(pk=5,
-                                                   name=getPropertyByName('name', tmpData.items()),
+                tmpNewGroup = Group.objects.create(name=getPropertyByName('name', tmpData.items()),
                                                    description=getPropertyByName('description', tmpData.items()),
                                                    logo_url=getPropertyByName('logo_url', tmpData.items()),
                                                    web_site_url=getPropertyByName('web_site_url', tmpData.items()),
                                                    created=date.today())
+
+                tmpUser = getUserByRequest(argRequest)
+                Group_User.objects.create(user=tmpUser,
+                                          group=tmpNewGroup,
+                                          role=getAdminRole())
                 tmpSerializer = GroupSerializer(tmpNewGroup)
                 return responseJsonUtil(True, None, tmpSerializer)
             except BaseException:
@@ -39,7 +43,7 @@ def groupsServices(argRequest, format=None):
             except Group.DoesNotExist:
                 return responseJsonUtil(False, 'ERROR000', None)
     else:
-        return responseJsonUtil(False, 'ERROR100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
 
 
 @api_view(['GET'])
@@ -59,11 +63,11 @@ def getGroupsByUser(request, format=None):
                 data = {'myGroups': tmpMyGroupsSerializer.data, 'belongToGroups': tmpBelongToGroupsSerializer.data}
                 return rawResponseJsonUtil(True, None, data)
             except User.DoesNotExist:
-                return responseJsonUtil(False, 'ERROR000', None)
+                return responseJsonUtil(False, 'ERROR400', None)
     else:
-        return responseJsonUtil(False, 'ERROR100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
 
-
+@api_view(['DELETE'])
 def deleteGroupProcess(argRequest, argGroupID):
     if userIsGroupAdmin(argRequest, argGroupID):
         try:
@@ -73,7 +77,7 @@ def deleteGroupProcess(argRequest, argGroupID):
         except BaseException:
             return responseJsonUtil(False, 'ERROR000', None)
     else:
-        return responseJsonUtil(False, 'ERROR314', None)
+        return responseJsonUtil(False, 'ERROR103', None)
 
     return responseJsonUtil(True, None, None)
 
@@ -81,7 +85,7 @@ def deleteGroupProcess(argRequest, argGroupID):
 @api_view(['GET'])
 def getUsersByGroup(argRequest, argGroupID, format=None):
     if not userAuthentication(argRequest):
-        return responseJsonUtil(False, 'ERROR100', None)
+        return responseJsonUtil(False, 'ERROR103', None)
 
     if argRequest.method == 'GET':
         try:

@@ -1,4 +1,7 @@
 .idea
 *.pyc
 alivetrackerdb
+settings.py.orig
+build/
+
 .fuse_hidden*
