@@ -18,7 +18,7 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
         tmpResult = Project.objects.raw('select  mproject.id, mproject.name, mproject.created, mproject.group_id \
         from main_project_user project_user inner join main_user muser on project_user.user_id = muser.id \
         inner join main_project mproject on project_user.project_id = mproject.id \
-        where muser.entity_status = 0 and muser.email= \'' + str(tmpMail) + '\' and mproject.group_id = ' + str(argGroupID))
+        where muser.entity_status = 0 and mproject.entity_status = 0 and muser.email= \'' + str(tmpMail) + '\' and mproject.group_id = ' + str(argGroupID))
         serializer = ProjectSerializer(tmpResult)
         return responseJsonUtil(True, None, serializer)
     except User.DoesNotExist:
@@ -132,14 +132,14 @@ def insertProjectUsers(argProjectUsers, argProjectID):
 
 # Creates a Project_User Model to be save into the project
 @api_view(['DELETE'])
-def deleteProject(argRequest, argId, format=None):
+def deleteProject(argRequest, argProjectID, format=None):
     try:
         if not userAuthentication(argRequest):
             return responseJsonUtil(False, 'ERROR103', None)
 
         if argRequest.method == 'DELETE':
-            Project.objects.filter(id=argId).update(entity_status=1)
-            tmpProject = Project.objects.filter(id=argId)
+            Project.objects.filter(id=argProjectID).update(entity_status=1)
+            tmpProject = Project.objects.filter(id=argProjectID)
             tmpSerializer = ProjectSerializer(tmpProject)
             return responseJsonUtil(True, None, tmpSerializer)
     except Project.DoesNotExist:
