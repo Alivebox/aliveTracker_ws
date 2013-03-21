@@ -254,8 +254,8 @@ def resetPassword(request,email, token,  format=None):
 
 @api_view(['GET'])
 def getRoles(argRequest):
-    #if not userAuthentication(argRequest):
-     #   return responseJsonUtil(False, 'ERROR100',  None)
+    if not userAuthentication(argRequest):
+       return responseJsonUtil(False, 'ERROR100',  None)
     try:
         tmpRoles = Role.objects.all()
         tmpRolesSerializer = RoleSerializer(tmpRoles)
