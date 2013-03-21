@@ -16,3 +16,4 @@ class UserLoginDTO(object):
         self.id = id
         self.email = email
         self.name = name
+

@@ -1,7 +1,7 @@
 from main.models import Log, Group
 from main.utils import *
 from logs.logReports import *
-from logs.serializers import LogSerializer
+from logs.serializers import LogSerializer, LogGroupProjectDateDTO
 from logs.deserializers import logDeserializer
 from django.db import transaction
 from rest_framework.parsers import JSONParser
@@ -20,8 +20,11 @@ def myLogsServices(request, group, format=None):
             return responseJsonUtil(False, 'ERROR303',  None)
 
         tmpDate = getPropertyByName("date",request.QUERY_PARAMS.items())
-        tmpResultLogs = Log.objects.raw('select * from main_log where user_id = '+str(getUserByRequest(request).id)+' and group_id = ' + group+' and date ="'+tmpDate+'"')
-        tmpSerializer = LogSerializer(tmpResultLogs)
+        # tmpResultLogs = Log.objects.raw('select * from main_log where user_id = '+str(getUserByRequest(request).id)+' and group_id = ' + group+' and date ="'+tmpDate+'"')
+        # tmpResultLogs = Log.objects.raw('select log.id as id, log.activity as activity, log.time as time, log.date as date, log.user_id as user, log.project_id as project, project.name as project_name, log.group_id as group from main_log log inner join main_project project on log.project_id = project.id where log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+ group+' and log.date ="'+tmpDate+'"')
+        # tmpResultLogs = Log.objects.raw('select log.id as id from main_log log inner join main_project project on log.project_id = project.id where log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+ group+' and log.date ="'+tmpDate+'"')
+        tmpResultLogs = Log.objects.raw('select log.id as id from main_log log inner join main_project project on log.project_id = project.id where log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+ group+' and log.date ="'+tmpDate+'"')
+        tmpSerializer = LogGroupProjectDateDTO(tmpResultLogs)
         return responseJsonUtil(True, None, tmpSerializer)
 
     if request.method == 'POST':
