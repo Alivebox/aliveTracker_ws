@@ -97,8 +97,8 @@ def saveProject(argRequest, argGroupId, format=None):
             Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
                 name=getPropertyByName('name', tmpData.items()),
                 description=getPropertyByName('description', tmpData.items()),
-                created=date.today(),
                 group=Group.objects.get(pk=argGroupId))
+            updateUserListInProject(tmpData, getPropertyByName('id', tmpData.items()))
             return responseJsonUtil(True, None, None)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR500', None)
