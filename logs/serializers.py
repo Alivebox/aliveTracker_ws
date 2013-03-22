@@ -31,23 +31,23 @@ class LogSerializer(serializers.ModelSerializer):
 
 class LogGroupProjectDateDTOSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    # activity = serializers.CharField()
-    # time = serializers.IntegerField(default=0)
-    # date = serializers.CharField()
-    # user = serializers.IntegerField(default=0)
-    # project = serializers.IntegerField()
-    # project_name = serializers.CharField()
-    # group = serializers.IntegerField()
+    activity = serializers.CharField()
+    time = serializers.IntegerField(default=0)
+    date = serializers.CharField()
+    user = serializers.IntegerField(default=0)
+    project = serializers.IntegerField()
+    project_name = serializers.CharField()
+    group = serializers.IntegerField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             instance.id = attrs['id']
-            # instance.activity = attrs['activity']
-            # instance.time = attrs['time']
-            # instance.date = attrs['date']
-            # instance.user = attrs['user_id']
-            # instance.project = attrs['project_id']
-            # instance.project_name = attrs['project_name']
-            # instance.group = attrs['group_id']
+            instance.activity = attrs['activity']
+            instance.time = attrs['time']
+            instance.date = attrs['date']
+            instance.user = attrs['user_id']
+            instance.project = attrs['project_id']
+            instance.project_name = attrs['project_name']
+            instance.group = attrs['group_id']
             return instance
         return LogGroupProjectDateDTO(**attrs)
