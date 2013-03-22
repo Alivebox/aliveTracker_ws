@@ -108,7 +108,15 @@ def convertUserRole(argUserRoleResult):
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
                              name=tmpItem[1],
-                             role=tmpItem[2], )
+                             role=tmpItem[2])
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
     return tmpList
+
+
+@api_view(['POST'])
+def updateUserRole(argRequest, format=None):
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False, 'ERROR103', None)
+
+    tmpData = JSONParser().parse(argRequest)
