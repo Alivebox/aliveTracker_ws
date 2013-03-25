@@ -7,6 +7,7 @@ from datetime import date
 from django.db import connection
 from projects.dtos import UserDTO
 from projects.serializers import userListSerializer
+from django.db import connection, transaction
 
 
 @api_view(['DELETE', 'POST', 'PUT'])
@@ -114,9 +115,37 @@ def convertUserRole(argUserRoleResult):
     return tmpList
 
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 def updateUserRole(argRequest, format=None):
     if not userAuthentication(argRequest):
         return responseJsonUtil(False, 'ERROR103', None)
 
-    tmpData = JSONParser().parse(argRequest)
+    try:
+        tmpData = JSONParser().parse(argRequest)
+        tmpGroupId = getPropertyByName('id', tmpData.items())
+        deleteUsersBelongGroup(tmpGroupId)
+        insertProjectUsers(tmpData, tmpGroupId)
+        return responseJsonUtil(True, None, None)
+    except Group_User.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR300', None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
+
+
+# Delete all users that belong to a project
+def deleteUsersBelongGroup(argGroupId):
+    cursor = connection.cursor()
+    cursor.execute('delete from main_group_user where group_id = ' + str(argGroupId))
+    transaction.commit_unless_managed()
+    connection.close()
+
+
+
+# Insert project_user
+def insertProjectUsers(argGroupUsers, argGroupID):
+    tmpList = getPropertyByName('users', argGroupUsers.items())
+    for tmpCont in range(len(tmpList)):
+        Group_User.objects.create(user=User.objects.get(pk=getPropertyByName('id', tmpList[tmpCont].items())),
+                                    group=Group.objects.get(pk=argGroupID),
+                                    role=Role.objects.get(name=getPropertyByName('role', tmpList[tmpCont].items())))

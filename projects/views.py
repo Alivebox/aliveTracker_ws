@@ -4,7 +4,6 @@ from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName, getUserByRequest
 from rest_framework.parsers import JSONParser
-from projects.deserializers import projectDeserializer
 from projects.dtos import ProjectUserListDTO, UserDTO
 from django.db import connection, transaction
 
