@@ -153,21 +153,14 @@ def update_user(request, pk, format=None):
 
 
 @api_view(['GET'])
-def getUsers(request, format=None):
+def getUsers(argRequest, argEmail, format=None):
     try:
-        if not userAuthentication(request):
+        if not userAuthentication(argRequest):
             return responseJsonUtil(False, 'ERROR103', None)
-        tmpQUERY = request.QUERY_PARAMS
-        limit = int(tmpQUERY['limit'])
-        tmpFilter = tmpQUERY['filter']
-        filtersList = buildFilters(tmpFilter)
-        filter = filtersList[0]
-        tmpValue = filter["value"]
-        tmpValue = tmpValue.replace("%", "")
-        tmpProperty = filter["property"]
-        tmpResultQuery = User.objects.filter(name__icontains=tmpValue)[:limit]
-        serializer = UserSerializer(tmpResultQuery)
-        return responseJsonUtil(True, None, serializer)
+        tmpLimit = 10
+        tmpResult = User.objects.filter(email__icontains=argEmail)[:tmpLimit]
+        tmpSerializer = UserSerializer(tmpResult)
+        return responseJsonUtil(True, None, tmpSerializer)
     except Group.DoesNotExist:
         return responseJsonUtil(False, "ERROR200", None)
 
