@@ -2,7 +2,7 @@ from django.contrib.sessions.models import Session
 from main.models import *
 from rest_framework.response import Response
 from datetime import datetime
-import string, datetime, smtplib, random, hashlib
+import string, smtplib, random, hashlib, time
 
 
 # Format a response that returns an json with the following properties:
@@ -28,7 +28,7 @@ def rawResponseJsonUtil(argSuccess, argErrorCode, argRawResult):
 def userAuthentication(argRequest):
     try:
         tmpSession = Session.objects.get(session_key=argRequest.session._session_key)
-        if tmpSession.expire_date.date() < datetime.datetime.now().date():
+        if tmpSession.expire_date.date() < datetime.now().date():
             return False
         return True
     except Session.DoesNotExist:
@@ -58,7 +58,8 @@ def dateToString(argDate):
 
 # The format string which returns is ej: September 24 2010 17:03
 def stringToDate(argString):
-    return argString.strptime('%B %d %Y %H:%M')
+    strp_time = time.strptime(argString, "%Y-%m-%d")
+    return datetime.fromtimestamp(time.mktime(strp_time))
 
 
 # Retrieve a desired value from a List in a key-value format
@@ -74,7 +75,7 @@ def sendEmail(argFROM, argTO, argSUBJECT, argMESSAGE):
 
     BODY = string.join((
                            "From: %s" % argFROM,
-                           "Date: %s" % datetime.datetime.now(),
+                           "Date: %s" % datetime.now(),
                            "To: %s" % argTO,
                            "Subject: %s" % argSUBJECT ,
                            "",
