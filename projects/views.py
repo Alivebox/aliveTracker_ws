@@ -4,7 +4,6 @@ from projects.serializers import ProjectSerializer, ProjectUserListDTOSerializer
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, userAuthentication, getPropertyByName, getUserByRequest
 from rest_framework.parsers import JSONParser
-from projects.deserializers import projectDeserializer
 from projects.dtos import ProjectUserListDTO, UserDTO
 from django.db import connection, transaction
 
@@ -59,7 +58,7 @@ def convertUserRole(argUserRoleResult):
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
                              name=tmpItem[1],
-                             role=tmpItem[2],)
+                             role=tmpItem[2])
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
     return tmpList
@@ -123,11 +122,10 @@ def deleteUsersBelongProject(argProjectId):
 # Insert project_user
 def insertProjectUsers(argProjectUsers, argProjectID):
     tmpList = getPropertyByName('users', argProjectUsers.items())
-    for tmpCont in range(len(tmpList)) :
+    for tmpCont in range(len(tmpList)):
         Project_User.objects.create(user=User.objects.get(pk=getPropertyByName('id', tmpList[tmpCont].items())),
                                     project=Project.objects.get(pk=argProjectID),
                                     role=Role.objects.get(name=getPropertyByName('role', tmpList[tmpCont].items())))
-
 
 
 # Creates a Project_User Model to be save into the project

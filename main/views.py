@@ -1,6 +1,6 @@
 from os import tmpnam
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Group, Role
-from main.serializers import UserSerializer, PermissionGroupDTOSerializer,UserDTOSerializer, UserSerializerDTO, \
+from main.serializers import UserSerializer, PermissionGroupDTOSerializer, UserDTOSerializer, UserSerializerDTO, \
     RoleSerializer
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 import json
@@ -11,11 +11,10 @@ from rest_framework.parsers import JSONParser
 from django.contrib.sessions.backends.db import SessionStore
 
 
-@api_view(['GET','POST','PUT'])
+@api_view(['GET', 'POST', 'PUT'])
 def user_services(request, pk, format=None):
-
     if not userAuthentication(request):
-        return responseJsonUtil(False, 'ERROR103',  None)
+        return responseJsonUtil(False, 'ERROR103', None)
     if request.method == 'GET':
         return user_authentication(request)
     if request.method == 'POST':
@@ -31,7 +30,6 @@ def user_authentication(argRequest, format=None):
         tmpEmail = str(getPropertyByName('email', tmpData.items()))
         tmpPassword = str(getPropertyByName('password', tmpData.items()))
         tmpUser = User.objects.get(password=tmpPassword, email=tmpEmail, entity_status=0)
-
 
         if argRequest.method == 'POST':
 
@@ -49,7 +47,7 @@ def user_authentication(argRequest, format=None):
             tmpSerializer = UserSerializerDTO(tmpUser)
             return responseJsonUtil(True, None, tmpSerializer)
     except User.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR400',  None)
+        return responseJsonUtil(False, 'ERROR400', None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
@@ -58,27 +56,27 @@ def user_authentication(argRequest, format=None):
 def getUserAuth(argRequest, format=None):
     try:
         if userAuthentication(argRequest):
-            tmpUser = User.objects.raw('Select * from main_user where session_key = \'' + argRequest.session.session_key +
-                                       '\'')
+            tmpUser = User.objects.raw(
+                'Select * from main_user where session_key = \'' + argRequest.session.session_key +
+                '\'')
             tmpSerializer = UserSerializer(tmpUser)
             return responseJsonUtil(True, None, tmpSerializer)
-        return responseJsonUtil(False, 'ERROR103',  None)
+        return responseJsonUtil(False, 'ERROR103', None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
 
 @api_view(['GET'])
 def user_permissions(request, pk, format=None):
-
     try:
         tmpMail = request.META['HTTP_USERNAME']
         tmpPassword = request.META['HTTP_PASSWORD']
         tmpGroup = Group.objects.get(pk=pk, entity_status=0)
-        tmpUser = User.objects.get(password=tmpPassword,email=tmpMail,entity_status=0)
+        tmpUser = User.objects.get(password=tmpPassword, email=tmpMail, entity_status=0)
         serializer = getGroupPermissionsByUser(tmpUser, tmpGroup)
         return responseJsonUtil(True, None, serializer)
     except User.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR100', None)
     except Group.DoesNotExist:
         return responseJsonUtil(False, "ERROR200", None)
 
@@ -103,7 +101,7 @@ def getProjectPermissionsByUser(argUser, argProject):
             where permission.entity_status = 0 \
             and  role.id = permroles.role_id \
             and role.entity_status = 0) rolePermissions on userproject.role_id = rolePermissions.idRole \
-        where userproject.user_id = ' + str(argUser.pk)+
+        where userproject.user_id = ' + str(argUser.pk) +
                                                  ' and userproject.project_id = ' + str(argProject.pk)
     )
     serializer = PermissionGroupDTOSerializer(tmpResultProjects)
@@ -113,35 +111,34 @@ def getProjectPermissionsByUser(argUser, argProject):
 @api_view(['GET'])
 def getUserByGroupAndProject(request, group, project):
     if not userAuthentication(request):
-        return responseJsonUtil(False, 'ERROR103',  None)
+        return responseJsonUtil(False, 'ERROR103', None)
     if not groupExists(group):
-        return responseJsonUtil(False, 'ERROR200',  None)
+        return responseJsonUtil(False, 'ERROR200', None)
     if not projectExists(project):
-        return responseJsonUtil(False, 'ERROR500',  None)
+        return responseJsonUtil(False, 'ERROR500', None)
     if not userIsGroupAdmin(request, group):
-        return responseJsonUtil(False, 'ERROR309',  None)
+        return responseJsonUtil(False, 'ERROR309', None)
 
     if request.method == 'GET':
         tmpResultUser = User.objects.raw('select * from main_user user '
                                          'inner join (select user_id as userId, role_id as role_id from main_project_user where project_id in '
-                                         '(select id from main_project  where group_id = '+str(group)+' and id='+str(project)+' )) tmpProjectUser on  user.id = tmpProjectUser.userId')
+                                         '(select id from main_project  where group_id = ' + str(
+            group) + ' and id=' + str(project) + ' )) tmpProjectUser on  user.id = tmpProjectUser.userId')
         tmpSerializer = UserDTOSerializer(tmpResultUser)
         return responseJsonUtil(True, None, tmpSerializer)
 
 
 def register_user(request):
-
     data = JSONParser().parse(request)
     tmpUserSerializer = UserSerializer(data=data)
     if tmpUserSerializer.is_valid():
         tmpUserSerializer.save()
         return responseJsonUtil(True, None, tmpUserSerializer)
     else:
-        return responseJsonUtil(False, 'ERROR101',  None)
+        return responseJsonUtil(False, 'ERROR101', None)
 
 
 def update_user(request, pk, format=None):
-
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -152,31 +149,23 @@ def update_user(request, pk, format=None):
         serializer.save()
         return responseJsonUtil(True, None, serializer)
     else:
-        return responseJsonUtil(False, 'ERROR01',  None)
+        return responseJsonUtil(False, 'ERROR01', None)
 
 
 @api_view(['GET'])
-def getUsers(request, format=None):
+def getUsers(argRequest, argEmail, format=None):
     try:
-        if not userAuthentication(request):
-            return responseJsonUtil(False, 'ERROR103',  None)
-        tmpQUERY = request.QUERY_PARAMS
-        limit = int(tmpQUERY['limit'])
-        tmpFilter = tmpQUERY['filter']
-        filtersList = buildFilters(tmpFilter)
-        filter = filtersList[0]
-        tmpValue = filter["value"]
-        tmpValue = tmpValue.replace("%", "")
-        tmpProperty = filter["property"]
-        tmpResultQuery = User.objects.filter(name__icontains=tmpValue)[:limit]
-        serializer = UserSerializer(tmpResultQuery)
-        return responseJsonUtil(True, None, serializer)
+        if not userAuthentication(argRequest):
+            return responseJsonUtil(False, 'ERROR103', None)
+        tmpLimit = 10
+        tmpResult = User.objects.filter(email__icontains=argEmail)[:tmpLimit]
+        tmpSerializer = UserSerializer(tmpResult)
+        return responseJsonUtil(True, None, tmpSerializer)
     except Group.DoesNotExist:
         return responseJsonUtil(False, "ERROR200", None)
 
 
 def buildFilters(argFilterQueryObject):
-
     tmpFilter = '{ "filters" : ' + argFilterQueryObject + '}'
     data = json.loads(tmpFilter)
     filtersList = data["filters"]
@@ -185,10 +174,9 @@ def buildFilters(argFilterQueryObject):
 
 @api_view(['POST'])
 def forgotPassword(request, format=None):
-
     if request.method == 'POST':
         data = JSONParser().parse(request)
-        TO = getPropertyByName('email',data.items())
+        TO = getPropertyByName('email', data.items())
         if emailExists(TO):
             code = md5Encoding(tokenGenerator())
             SUBJECT = "AliveTracker forgot password instructions. (DO NOT REPLY)"
@@ -197,7 +185,7 @@ def forgotPassword(request, format=None):
             Hey, we heard you lost your AliveTracker password.
             Use the following link to reset your password:
 
-                     http://www.alivetracker.com:8000/main/resetPassword/"""+TO+"""/"""+code+"""
+                     http://www.alivetracker.com:8000/main/resetPassword/""" + TO + """/""" + code + """
 
             Ignore this email if you haven't experienced any password trouble.
 
@@ -208,19 +196,18 @@ def forgotPassword(request, format=None):
                 User_Forgot_Password.objects.get_or_create(user=tmpUser)
                 User_Forgot_Password.objects.filter(user=tmpUser).update(token=code)
             except:
-                return responseJsonUtil(False, 'ERROR000',  None)
+                return responseJsonUtil(False, 'ERROR000', None)
             try:
                 sendEmail(FROM, TO, SUBJECT, MESSAGE)
-                return responseJsonUtil(True, None,  None)
+                return responseJsonUtil(True, None, None)
             except:
-                return responseJsonUtil(False, 'ERROR002',  None)
+                return responseJsonUtil(False, 'ERROR002', None)
         else:
-            return responseJsonUtil(False, 'ERROR102',  None)
+            return responseJsonUtil(False, 'ERROR102', None)
 
 
 @api_view(['GET'])
-def resetPassword(request,email, token,  format=None):
-
+def resetPassword(request, email, token, format=None):
     if request.method == 'GET':
 
         if correctForgotPasswordToken(email, token):
@@ -232,8 +219,8 @@ def resetPassword(request,email, token,  format=None):
             MESSAGE = """
             You requested to have your password reset, below is your new password.
 
-                      Username:"""+TO+"""
-                      New Password: """+tmpPassword+"""
+                      Username:""" + TO + """
+                      New Password: """ + tmpPassword + """
 
                       To login your new password, please go to
                       http://www.alivetracker.com
@@ -242,23 +229,36 @@ def resetPassword(request,email, token,  format=None):
             try:
                 User.objects.filter(email=TO).update(password=code, entity_status=2)
             except:
-                return responseJsonUtil(False, 'ERROR000',  None)
+                return responseJsonUtil(False, 'ERROR000', None)
             try:
                 sendEmail(FROM, TO, SUBJECT, MESSAGE)
-                return responseJsonUtil(True, None,  None)
+                return responseJsonUtil(True, None, None)
             except:
-                return responseJsonUtil(False, 'ERROR002',  None)
+                return responseJsonUtil(False, 'ERROR002', None)
         else:
-            return responseJsonUtil(False, 'ERROR100',  None)
+            return responseJsonUtil(False, 'ERROR100', None)
 
 
 @api_view(['GET'])
 def getRoles(argRequest):
     if not userAuthentication(argRequest):
-       return responseJsonUtil(False, 'ERROR100',  None)
+        return responseJsonUtil(False, 'ERROR100', None)
     try:
         tmpRoles = Role.objects.all()
         tmpRolesSerializer = RoleSerializer(tmpRoles)
         return responseJsonUtil(True, None, tmpRolesSerializer)
     except Role.DoesNotExist:
-        return responseJsonUtil(False, 'ERROR600',  None)
+        return responseJsonUtil(False, 'ERROR600', None)
+
+
+@api_view(['DELETE'])
+def deleteUser(argRequest, argUserID, argGroupID):
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False, 'ERROR100', None)
+    try:
+        tmpGroupUser = Group_User.objects.get(user_id=str(argUserID),
+                               group_id=str(argGroupID))
+        tmpGroupUser.delete()
+        return responseJsonUtil(True, None, None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
