@@ -120,10 +120,10 @@ def getUserByGroupAndProject(request, group, project):
         return responseJsonUtil(False, 'ERROR309', None)
 
     if request.method == 'GET':
-        tmpResultUser = User.objects.raw('select * from main_user user '
+        tmpResultUser = User.objects.raw('select * from main_user tmpUser '
                                          'inner join (select user_id as userId, role_id as role_id from main_project_user where project_id in '
                                          '(select id from main_project  where group_id = ' + str(
-            group) + ' and id=' + str(project) + ' )) tmpProjectUser on  user.id = tmpProjectUser.userId')
+            group) + ' and id=' + str(project) + ' )) tmpProjectUser on  tmpUser.id = tmpProjectUser.userId')
         tmpSerializer = UserDTOSerializer(tmpResultUser)
         return responseJsonUtil(True, None, tmpSerializer)
 
