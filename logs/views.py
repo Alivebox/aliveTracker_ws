@@ -3,8 +3,6 @@ from main.utils import *
 from logs.logReports import *
 from logs.serializers import LogGroupProjectDateDTOSerializer
 from logs.deserializers import logDeserializer
-from logs.dtos import LogGroupProjectDateDTO
-from django.db import connection
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
@@ -22,12 +20,7 @@ def myLogsServices(request, group, format=None):
             return responseJsonUtil(False, 'ERROR303',  None)
 
         tmpDate = getPropertyByName("date",request.QUERY_PARAMS.items())
-        tmpResultLogs = Log.objects.raw('select log.id , activity, log.time, log.date, log.user_id, log.project_id, project.name as project_name, log.group_id from main_log log inner join main_project project on log.project_id = project.id where log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+group+' and log.date ="'+tmpDate+'"')
-        # tmpResultLogs = Log.objects.raw('select log.id , activity, log.time, log.date, log.user, log.project, project.name as project_name, log.group from main_log log inner join main_project project on log.project = project.id where log.user = '+str(getUserByRequest(request).id)+' and log.group = '+group+' and log.date ="'+tmpDate+'"')
-        # cursor = connection.cursor()
-        # cursor.execute('select log.id , activity, log.time, log.date, log.user_id, log.project_id, project.name as project_name, log.group_id from main_log log inner join main_project project on log.project_id = project.id where log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+group+' and log.date ="'+tmpDate+'"')
-        # tmpResultLogs = cursor.fetchall()
-        # connection.close()
+        tmpResultLogs = Log.objects.raw('select log.id , activity, log.time, log.date, log.user_id, log.project_id, project.name as project_name, log.group_id from main_log log inner join main_project project on log.project_id = project.id where log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+group+' and log.date = \''+tmpDate+'\'')
         tmpSerializer = LogGroupProjectDateDTOSerializer(tmpResultLogs)
         return responseJsonUtil(True, None, tmpSerializer)
 
@@ -52,6 +45,8 @@ def myLogsServices(request, group, format=None):
 
 
 def deleteLog(argUser, argGroup, argDate):
+    if not groupExists(argGroup):
+        return 'ERROR200'
     Log.objects.filter(user=argUser, group=Group.objects.get(pk=argGroup), date=argDate).update(entity_status=1)
 
 

@@ -39,12 +39,9 @@ class Log(models.Model):
     activity = models.TextField()
     time = models.SmallIntegerField()
     date = models.DateField()
-    # user = models.ForeignKey(User)
-    user = models.IntegerField()
-    # project = models.ForeignKey(Project)
-    project = models.IntegerField()
-    # group = models.ForeignKey(Group)
-    group = models.IntegerField()
+    user = models.ForeignKey(User)
+    project = models.ForeignKey(Project)
+    group = models.ForeignKey(Group)
     entity_status = models.SmallIntegerField(default=0)
 
     def __unicode__(self):
