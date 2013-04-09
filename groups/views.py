@@ -70,6 +70,8 @@ def getGroupsByUser(request, format=None):
 
 @api_view(['DELETE'])
 def deleteGroupProcess(argRequest, argGroupID):
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False, 'ERROR103',  None)
     if userIsGroupAdmin(argRequest, argGroupID):
         try:
             Group.objects.filter(id=argGroupID).update(entity_status=1)

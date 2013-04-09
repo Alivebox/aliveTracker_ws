@@ -3,8 +3,6 @@ from main.utils import *
 from logs.logReports import *
 from logs.serializers import LogGroupProjectDateDTOSerializer
 from logs.deserializers import logDeserializer
-from logs.dtos import LogGroupProjectDateDTO
-from django.db import connection
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
@@ -65,6 +63,7 @@ def validateProject(request, argProjectID, argGroupID):
 
 @api_view(['POST','GET'])
 def exportReport(request, format=None):
+    # delete if after frond end implementation
     if request.method == 'GET':
         reportBook = buildReport(3, 0, 0,0,'2012-01-01','2013-03-01')
         return buildExcelFileResponse('logReport.xls', reportBook)
