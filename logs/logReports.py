@@ -75,18 +75,18 @@ def addUserReportSheet(reportBook,argGroupID,argProjectID,argUser, argRangeId, a
 def buildReportQuery(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
     tmpFilter = "select * from main_log where group_id = "+str(argGroupID)
     tmpFilter = tmpFilter +" and  user_id = "+ str(argUserID)
-    if argProjectID != 0:
+    if argProjectID != '0':
         tmpFilter = tmpFilter +" and  project_id = "+ str(argProjectID)
-    if argRangeId == 0:
+    if argRangeId == '0':
         tmpFilter = tmpFilter +" and date between '"+str(argStartDate)+"' and '"+str(argEndDate)+"'"
     else:
-        if argRangeId == 1:
+        if argRangeId == '1':
             tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-1' and CURRENT_DATE"
-        if argRangeId == 2:
+        if argRangeId == '2':
             tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-7' and CURRENT_DATE"
-        if argRangeId == 3:
+        if argRangeId == '3':
             tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-14' and CURRENT_DATE"
-        if argRangeId == 4:
+        if argRangeId == '4':
             tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-30' and CURRENT_DATE"
     return tmpFilter+" and entity_status = 0 order by project_id, date asc"
 
