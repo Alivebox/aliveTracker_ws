@@ -60,29 +60,36 @@ def validateProject(request, argProjectID, argGroupID):
         return 'ERROR305'
     return None
 
+def validateExportReport(request):
+    data = request.DATA
+    if not groupExists(getPropertyByName('group',data.items())):
+        return 'ERROR200'
+    if not projectExists(getPropertyByName('project',data.items())):
+        return 'ERROR500'
+    return None
 
 @api_view(['POST','GET'])
 def exportReport(request, format=None):
-    # delete if after frond end implementation
-    if request.method == 'GET':
-        reportBook = buildReport(3, 0, 0,0,'2012-01-01','2013-03-01')
-        return buildExcelFileResponse('logReport.xls', reportBook)
-    if userAuthentication(request):
-        if request.method == 'POST':
-            data = JSONParser().parse(request)
-            tmpGroupID = getPropertyByName('groupId',data.items())
-            tmpProjectID = getPropertyByName('projectId',data.items())
-            tmpUserID = getPropertyByName('userId',data.items())
-            tmpDateRangeId = getPropertyByName('dateRangeId',data.items())
-            tmpStartDate = getPropertyByName('startDate',data.items())
-            tmpEndDate = getPropertyByName('endDate',data.items())
-            errorCode = exportReportPermissionsValidation(tmpGroupID, tmpProjectID, tmpUserID)
-            if errorCode != None:
-                return responseJsonUtil(False, errorCode, None)
-            reportBook = buildReport(tmpGroupID, tmpProjectID, tmpUserID,tmpDateRangeId,tmpStartDate,tmpEndDate)
-            return buildExcelFileResponse('logReport.xls', reportBook)
-    else:
+    if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
+    if request.method == 'POST':
+        if validateExportReport(request):
+            return responseJsonUtil(False, validateExportReport(request),  None)
+        return responseJsonUtil(True, None, None);
+    if request.method == 'GET':
+        data = request.QUERY_PARAMS
+        tmpGroupID = getPropertyByName('group',data.items())
+        tmpProjectID = getPropertyByName('project',data.items())
+        tmpUserID = getPropertyByName('user',data.items())
+        tmpDateRangeId = getPropertyByName('dateRangeOption',data.items())
+        tmpStartDate = convertDateFromDatePicker(getPropertyByName('startDate',data.items()))
+        tmpEndDate = convertDateFromDatePicker(getPropertyByName('endDate',data.items()))
+        errorCode = exportReportPermissionsValidation(tmpGroupID, tmpProjectID, tmpUserID)
+        if errorCode != None:
+            return responseJsonUtil(False, errorCode, None)
+        reportBook = buildReport(tmpGroupID, tmpProjectID, tmpUserID,tmpDateRangeId,tmpStartDate,tmpEndDate)
+        return buildExcelFileResponse('logReport.xls', reportBook)
+
 
 
 def exportReportPermissionsValidation(argGroupID,argProjectID,argUserID):

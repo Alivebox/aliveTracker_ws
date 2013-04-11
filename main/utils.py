@@ -183,5 +183,7 @@ def userIsProjectMember(argRequest, argProjectID):
         return False
 
 def convertDateFromDatePicker(argStringDate):
+    if not argStringDate:
+        return None
     tmpCleanString = argStringDate[:10]
     return tmpCleanString
