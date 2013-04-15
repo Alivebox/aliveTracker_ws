@@ -172,9 +172,9 @@ def buildFilters(argFilterQueryObject):
     return filtersList
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def forgotPassword(request, format=None):
-    if request.method == 'POST':
+    if request.method == 'PUT':
         data = JSONParser().parse(request)
         TO = getPropertyByName('email', data.items())
         if emailExists(TO):
@@ -185,7 +185,7 @@ def forgotPassword(request, format=None):
             Hey, we heard you lost your AliveTracker password.
             Use the following link to reset your password:
 
-                     http://www.alivetracker.com:8000/main/resetPassword/""" + TO + """/""" + code + """
+                     http://www.alivetracker.com/#resetPasswordPage?email=""" + TO + """&token=""" + code + """
 
             Ignore this email if you haven't experienced any password trouble.
 
