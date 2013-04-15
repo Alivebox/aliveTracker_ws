@@ -127,6 +127,7 @@ def getUserByGroupAndProject(request, group, project):
         tmpSerializer = UserDTOSerializer(tmpResultUser)
         return responseJsonUtil(True, None, tmpSerializer)
 
+
 def register_user(request):
     data = JSONParser().parse(request)
     tmpUserSerializer = UserSerializer(data=data)
