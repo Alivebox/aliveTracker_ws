@@ -128,7 +128,7 @@ def getUserByGroupAndProject(request, group, project):
         return responseJsonUtil(True, None, tmpSerializer)
 
 
-@api_view(['POST'])
+@api_view(['PUT'])
 def register_user(request):
     data = JSONParser().parse(request)
     tmpUserSerializer = UserSerializer(data=data)
