@@ -135,7 +135,6 @@ def register_user(request):
         tmpNewUser = User.objects.create(email=getPropertyByName('email', data.items()),
                                          password=getPropertyByName('password', data.items()))
         tmpUserSerializer = UserSerializer(tmpNewUser)
-        tmpUserSerializer.save()
         return responseJsonUtil(True, None, tmpUserSerializer)
     except BaseException:
         return responseJsonUtil(False, 'ERROR101', None)
