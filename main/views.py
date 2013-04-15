@@ -131,12 +131,12 @@ def getUserByGroupAndProject(request, group, project):
 @api_view(['POST'])
 def register_user(request):
     data = JSONParser().parse(request)
-    tmpUserSerializer = UserSerializer(data=data)
+    tmpUserSerializer = UserSerializer(data)
     if tmpUserSerializer.is_valid():
         tmpUserSerializer.save()
         return responseJsonUtil(True, None, tmpUserSerializer)
     else:
-        return responseJsonUtil(False, 'ERROR103', None)
+        return responseJsonUtil(False, 'ERROR101', None)
 
 
 def update_user(request, pk, format=None):
