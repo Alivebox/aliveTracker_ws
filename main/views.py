@@ -131,8 +131,7 @@ def getUserByGroupAndProject(request, group, project):
 @api_view(['POST'])
 def register_user(request):
     data = JSONParser().parse(request)
-    tmpNewUser = User.objects.create(name=getPropertyByName('name', data.items()),
-                                     email=getPropertyByName('email', data.items()),
+    tmpNewUser = User.objects.create(email=getPropertyByName('email', data.items()),
                                      password=getPropertyByName('password', data.items()))
     tmpUserSerializer = UserSerializer(tmpNewUser)
     if tmpUserSerializer.is_valid():
