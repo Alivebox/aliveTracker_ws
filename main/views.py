@@ -136,7 +136,7 @@ def register_user(request):
         tmpUserSerializer.save()
         return responseJsonUtil(True, None, tmpUserSerializer)
     else:
-        return responseJsonUtil(False, 'ERROR101', None)
+        return responseJsonUtil(False, 'ERROR103', None)
 
 
 def update_user(request, pk, format=None):
