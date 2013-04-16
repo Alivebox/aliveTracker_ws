@@ -140,6 +140,7 @@ def register_user(request):
         return responseJsonUtil(False, 'ERROR101', None)
 
 
+@api_view(['PUT'])
 def update_user(request, pk, format=None):
     try:
         user = User.objects.get(pk=pk)
