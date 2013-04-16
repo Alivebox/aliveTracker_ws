@@ -187,3 +187,8 @@ def convertDateFromDatePicker(argStringDate):
         return None
     tmpCleanString = argStringDate[:10]
     return tmpCleanString
+
+def changePassword(argEntityStatus):
+    if argEntityStatus == 2:
+        return True
+    return False
