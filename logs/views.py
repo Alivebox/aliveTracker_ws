@@ -91,18 +91,17 @@ def exportReport(request, format=None):
         return buildExcelFileResponse('logReport.xls', reportBook)
 
 
-@api_view(['POST','GET'])
-def listReport(request, format=None):
+@api_view(['GET'])
+def listReport(request, group, project, user, range, start, end):
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
     if request.method == 'GET':
-        data = request.QUERY_PARAMS
-        tmpGroupID = getPropertyByName('group',data.items())
-        tmpProjectID = getPropertyByName('project',data.items())
-        tmpUserID = getPropertyByName('user',data.items())
-        tmpDateRangeId = getPropertyByName('dateRangeOption',data.items())
-        tmpStartDate = convertDateFromDatePicker(getPropertyByName('startDate',data.items()))
-        tmpEndDate = convertDateFromDatePicker(getPropertyByName('endDate',data.items()))
+        tmpGroupID = group
+        tmpProjectID = project
+        tmpUserID = user
+        tmpDateRangeId = range
+        tmpStartDate = start
+        tmpEndDate = end
         errorCode = exportReportPermissionsValidation(tmpGroupID, tmpProjectID, tmpUserID)
         if errorCode != None:
             return responseJsonUtil(False, errorCode, None)
