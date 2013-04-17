@@ -147,15 +147,16 @@ def update_user(request, pk, format=None):
     except User.DoesNotExist:
         return responseJsonUtil(False, 404, None)
     data = JSONParser().parse(request)
+    tmpName = getPropertyByName('name', data.items())
+    user.name = tmpName
+    user.entity_status = 0
+    user.save()
     serializer = UserSerializer(user, data=data)
-    if serializer.is_valid():
-        serializer.save()
-        return responseJsonUtil(True, None, serializer)
-    else:
-        return responseJsonUtil(False, 'ERROR01', None)
+    return responseJsonUtil(True, None, serializer)
 
 
-@api_view(['GET'])
+
+@api_view(['GET', 'POST'])
 def getUsers(argRequest, argEmail, format=None):
     try:
         if not userAuthentication(argRequest):
@@ -265,3 +266,4 @@ def deleteUser(argRequest, argUserID, argGroupID):
         return responseJsonUtil(True, None, None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
+
