@@ -66,13 +66,10 @@ def buildReport(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None
     return reportBook
 
 
-def listReport(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
-    if argUserID!=0:
-        tmpUser = User.objects.get(id = argUserID)
-        tmpQuery = buildReportQuery(argGroupID,argProjectID,tmpUser.id,argRangeId, argStartDate, argEndDate)
-        tmpLogsRegister = Log.objects.raw(tmpQuery)
-        return tmpLogsRegister
-    return None
+def getListReport(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
+    tmpQuery = buildReportQuery(argGroupID,argProjectID,argUserID,argRangeId, argStartDate, argEndDate)
+    tmpLogsRegister = Log.objects.raw(tmpQuery)
+    return tmpLogsRegister
 
 
 def addUserReportSheet(reportBook,argGroupID,argProjectID,argUser, argRangeId, argStartDate=None, argEndDate=None):
@@ -82,8 +79,10 @@ def addUserReportSheet(reportBook,argGroupID,argProjectID,argUser, argRangeId, a
     return reportBook
 
 def buildReportQuery(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
-    tmpFilter = "select * from main_log where group_id = "+str(argGroupID)
-    tmpFilter = tmpFilter +" and  user_id = "+ str(argUserID)
+    tmpFilter = "select log.id , activity, log.time, log.date, project.name as project_name from " \
+                "main_log log inner join main_project project on log.project_id = project.id " \
+                "where log.group_id = "+str(argGroupID)
+    tmpFilter = tmpFilter +" and  log.user_id = "+ str(argUserID)
     if argProjectID != '0':
         tmpFilter = tmpFilter +" and  project_id = "+ str(argProjectID)
     if argRangeId == '0':
@@ -97,6 +96,6 @@ def buildReportQuery(argGroupID,argProjectID,argUserID, argRangeId, argStartDate
             tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-14' and CURRENT_DATE"
         if argRangeId == '4':
             tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-30' and CURRENT_DATE"
-    return tmpFilter+" and entity_status = 0 order by project_id, date asc"
+    return tmpFilter+" and log.entity_status = 0 order by project_id, date asc"
 
 
