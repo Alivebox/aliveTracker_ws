@@ -29,7 +29,7 @@ def user_authentication(argRequest, format=None):
         tmpData = JSONParser().parse(argRequest)
         tmpEmail = str(getPropertyByName('email', tmpData.items()))
         tmpPassword = str(getPropertyByName('password', tmpData.items()))
-        tmpUser = User.objects.get(password=tmpPassword, email=tmpEmail, entity_status=0)
+        tmpUser = User.objects.exclude(entity_status = 1).get(password=tmpPassword, email=tmpEmail)
 
         if argRequest.method == 'POST':
 
@@ -51,6 +51,13 @@ def user_authentication(argRequest, format=None):
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
+@api_view(['POST'])
+def logout(argRequest):
+    if argRequest.method == 'POST':
+        if 'id' in argRequest.session:
+            tmpSession = SessionStore()
+            tmpSession.delete(argRequest.session._session_key)
+        return responseJsonUtil(True, None, None)
 
 @api_view(['GET'])
 def getUserAuth(argRequest, format=None):
@@ -210,9 +217,12 @@ def forgotPassword(request, format=None):
             return responseJsonUtil(False, 'ERROR102', None)
 
 
-@api_view(['GET'])
-def resetPassword(request, email, token, format=None):
-    if request.method == 'GET':
+@api_view(['PUT'])
+def resetPassword(request, format=None):
+    if request.method == 'PUT':
+        data = JSONParser().parse(request)
+        email = getPropertyByName('email', data.items())
+        token = getPropertyByName('token', data.items())
 
         if correctForgotPasswordToken(email, token):
             TO = email

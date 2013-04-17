@@ -5,3 +5,4 @@ settings.py.orig
 build/
 
 .fuse_hidden*
+.sencha_backup*

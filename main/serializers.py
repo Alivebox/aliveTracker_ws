@@ -26,12 +26,14 @@ class UserSerializerDTO(serializers.Serializer):
     id = serializers.IntegerField()
     email = serializers.CharField()
     name = serializers.CharField()
+    entity_status = serializers.IntegerField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             instance.id = attrs['id']
             instance.email = attrs['email']
             instance.name = attrs['name']
+            instance.entity_status = attrs['entity_status']
             return instance
         return UserLoginDTO(**attrs)
 

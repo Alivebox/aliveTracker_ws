@@ -66,6 +66,15 @@ def buildReport(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None
     return reportBook
 
 
+def listReport(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
+    if argUserID!=0:
+        tmpUser = User.objects.get(id = argUserID)
+        tmpQuery = buildReportQuery(argGroupID,argProjectID,tmpUser.id,argRangeId, argStartDate, argEndDate)
+        tmpLogsRegister = Log.objects.raw(tmpQuery)
+        return tmpLogsRegister
+    return None
+
+
 def addUserReportSheet(reportBook,argGroupID,argProjectID,argUser, argRangeId, argStartDate=None, argEndDate=None):
     tmpQuery = buildReportQuery(argGroupID,argProjectID,argUser.id,argRangeId, argStartDate, argEndDate)
     logsRegister = Log.objects.raw(tmpQuery)
