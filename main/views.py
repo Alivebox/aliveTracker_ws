@@ -51,6 +51,13 @@ def user_authentication(argRequest, format=None):
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
+@api_view(['POST'])
+def logout(argRequest):
+    if argRequest.method == 'POST':
+        if 'id' in argRequest.session:
+            tmpSession = SessionStore()
+            tmpSession.delete(argRequest.session._session_key)
+        return responseJsonUtil(True, None, None)
 
 @api_view(['GET'])
 def getUserAuth(argRequest, format=None):
