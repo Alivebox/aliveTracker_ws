@@ -15,7 +15,6 @@ urlpatterns = patterns('',
                        url(r'^main/forgotPassword/$', 'main.views.forgotPassword'),
                        url(r'^main/resetPassword/(?P<email>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})/(?P<token>[A-Za-z0-9]+)$', 'main.views.resetPassword'),
                        url(r'^main/users/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+)))$', 'main.views.getUsers'),
-                       url(r'^main/users2/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})$', 'main.views.getUsers'),
                        url(r'^roles/', 'main.views.getRoles'),
                        url(r'^main/users/delete/(?P<argUserID>[0-9]+)/group/(?P<argGroupID>[0-9]+)$', 'main.views.deleteUser')
                        )

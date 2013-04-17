@@ -91,11 +91,11 @@ def exportReport(request, format=None):
         return buildExcelFileResponse('logReport.xls', reportBook)
 
 
-@api_view(['POST','GET'])
+@api_view(['POST'])
 def listReport(request, format=None):
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
-    if request.method == 'GET':
+    if request.method == 'POST':
         data = request.QUERY_PARAMS
         tmpGroupID = getPropertyByName('group',data.items())
         tmpProjectID = getPropertyByName('project',data.items())
