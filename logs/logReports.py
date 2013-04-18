@@ -19,7 +19,7 @@ def addReportSheet(argWorkBook, argUserName, argLogDetail):
         index = 0
         for value in argLogDetail:
             index += 1
-            addSheetRow(reportSheet,index,value,rowStyle)
+            addSheetRow(reportSheet,index,value, argUserName,rowStyle)
     else:
         defineVoidActivitySheet(reportSheet,headerStyle)
 
@@ -45,9 +45,9 @@ def defineVoidActivitySheet(argReportSheet,argHeaderStyle):
     argReportSheet.write(0, 0, 'The user does not register any activity in the given period of time',argHeaderStyle)
 
 
-def addSheetRow(argReportSheet,argIndex,argValue, argHeaderStyle):
-    argReportSheet.write(argIndex, 0, str(argValue.project),argHeaderStyle)
-    argReportSheet.write(argIndex, 1, str(argValue.user),argHeaderStyle)
+def addSheetRow(argReportSheet,argIndex,argValue, argUserName, argHeaderStyle):
+    argReportSheet.write(argIndex, 0, str(argValue.project_name),argHeaderStyle)
+    argReportSheet.write(argIndex, 1, str(argUserName),argHeaderStyle)
     argReportSheet.write(argIndex, 2, str(argValue.activity),argHeaderStyle)
     argReportSheet.write(argIndex, 3, str(argValue.time),argHeaderStyle)
     argReportSheet.write(argIndex, 4, str(argValue.date),argHeaderStyle)

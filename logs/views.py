@@ -99,7 +99,10 @@ def listReport(request, group, project, user, range):
         errorCode = exportReportPermissionsValidation(group, project, user)
         if errorCode != None:
             return responseJsonUtil(False, errorCode, None)
-        tmpResultLogs = getListReport(group, project, user, range, start, end)
+        data = request.QUERY_PARAMS
+        tmpStartDate = convertDateFromDatePicker(getPropertyByName('startDate',data.items()))
+        tmpEndDate = convertDateFromDatePicker(getPropertyByName('endDate',data.items()))
+        tmpResultLogs = getListReport(group, project, user, range, tmpStartDate, tmpEndDate)
         tmpSerializer = LogGroupProjectDateDTOSerializer(tmpResultLogs)
         return responseJsonUtil(True, None, tmpSerializer)
 
