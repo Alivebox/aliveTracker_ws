@@ -92,20 +92,14 @@ def exportReport(request, format=None):
 
 
 @api_view(['GET'])
-def listReport(request, group, project, user, range, start, end):
+def listReport(request, group, project, user, range):
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
     if request.method == 'GET':
-        tmpGroupID = group
-        tmpProjectID = project
-        tmpUserID = user
-        tmpDateRangeId = range
-        tmpStartDate = start
-        tmpEndDate = end
-        errorCode = exportReportPermissionsValidation(tmpGroupID, tmpProjectID, tmpUserID)
+        errorCode = exportReportPermissionsValidation(group, project, user)
         if errorCode != None:
             return responseJsonUtil(False, errorCode, None)
-        tmpResultLogs = listReport(tmpGroupID, tmpProjectID, tmpUserID,tmpDateRangeId,tmpStartDate,tmpEndDate)
+        tmpResultLogs = getListReport(group, project, user, range, start, end)
         tmpSerializer = LogGroupProjectDateDTOSerializer(tmpResultLogs)
         return responseJsonUtil(True, None, tmpSerializer)
 
