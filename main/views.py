@@ -155,7 +155,9 @@ def update_user(request, pk, format=None):
         return responseJsonUtil(False, 404, None)
     data = JSONParser().parse(request)
     tmpName = getPropertyByName('name', data.items())
+    tmpPassword = getPropertyByName('password', data.items())
     user.name = tmpName
+    user.password = tmpPassword
     user.entity_status = 0
     user.save()
     serializer = UserSerializer(user, data=data)
