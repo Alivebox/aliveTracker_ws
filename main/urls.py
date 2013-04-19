@@ -15,8 +15,8 @@ urlpatterns = patterns('',
                        url(r'^main/user/group/(?P<group>[0-9]+)/project/(?P<project>[0-9]+)$', 'main.views.getUserByGroupAndProject'),
                        url(r'^main/forgotPassword/$', 'main.views.forgotPassword'),
                        url(r'^main/resetPassword/$', 'main.views.resetPassword'),
-                       url(r'^main/users/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+)))$', 'main.views.getUsers'),
-                       url(r'^main/email/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})$', 'main.views.getUsers'),
+                       url(r'^main/users/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))?(@)?([A-Za-z0-9]+)?(\.)?([A-Za-z]+)?)$', 'main.views.getUsers'),
+                       url(r'^main/email/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})/$', 'main.views.getUsers'),
                        url(r'^roles/', 'main.views.getRoles'),
                        url(r'^main/users/delete/(?P<argUserID>[0-9]+)/group/(?P<argGroupID>[0-9]+)$', 'main.views.deleteUser')
 )
