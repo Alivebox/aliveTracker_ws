@@ -4,6 +4,7 @@ from main.serializers import UserSerializer, PermissionGroupDTOSerializer, UserD
     RoleSerializer
 from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
 import json
+import locales
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, \
     correctForgotPasswordToken
@@ -33,7 +34,7 @@ def user_authentication(argRequest, format=None):
 
         if argRequest.method == 'POST':
 
-            if 'id' not in argRequest.session:
+            if 'id' not in argRequest.session or argRequest.session._session_key == locales.INVALID_SESSION_KEY:
                 tmpTokken = md5Encoding(tokenGenerator(16))
                 argRequest.session['id'] = tmpTokken
                 tmpSession = SessionStore()
@@ -55,8 +56,8 @@ def user_authentication(argRequest, format=None):
 def logout(argRequest):
     if argRequest.method == 'POST':
         if 'id' in argRequest.session:
-            tmpSession = SessionStore()
-            tmpSession.delete(argRequest.session._session_key)
+            argRequest.session['id'] = locales.INVALID_SESSION_KEY
+            argRequest.session._session_key = locales.INVALID_SESSION_KEY
         return responseJsonUtil(True, None, None)
 
 @api_view(['GET'])
