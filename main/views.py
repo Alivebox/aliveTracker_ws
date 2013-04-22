@@ -7,7 +7,7 @@ import json
 import locales
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, \
-    correctForgotPasswordToken
+    correctForgotPasswordToken, getUserByRequest
 from rest_framework.parsers import JSONParser
 from django.contrib.sessions.backends.db import SessionStore
 
@@ -77,10 +77,10 @@ def getUserAuth(argRequest, format=None):
 @api_view(['GET'])
 def user_permissions(request, pk, format=None):
     try:
-        tmpMail = request.META['HTTP_USERNAME']
-        tmpPassword = request.META['HTTP_PASSWORD']
+        if not userAuthentication(request):
+            return responseJsonUtil(False, 'ERROR103', None)
         tmpGroup = Group.objects.get(pk=pk, entity_status=0)
-        tmpUser = User.objects.get(password=tmpPassword, email=tmpMail, entity_status=0)
+        tmpUser = getUserByRequest(request)
         serializer = getGroupPermissionsByUser(tmpUser, tmpGroup)
         return responseJsonUtil(True, None, serializer)
     except User.DoesNotExist:
@@ -96,8 +96,7 @@ def getGroupPermissionsByUser(argUser, argGroup):
             and  role.id = permroles.role_id \
             and role.entity_status = 0) \
             rolePermissions on usergroup.role_id = rolePermissions.idRole \
-        where usergroup.user_id = ' + str(argUser.pk) +
-                                             ' and usergroup.group_id = ' + str(argGroup.pk)
+        where usergroup.user_id = ' + str(argUser.pk) +' and usergroup.group_id = ' + str(argGroup.pk)
     )
     serializer = PermissionGroupDTOSerializer(tmpResultGroups)
     return serializer
