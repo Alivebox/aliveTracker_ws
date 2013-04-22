@@ -5,7 +5,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 admin.autodiscover(),
 urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),
-                       url(r'^main/$', 'main.views.user_authentication'),
+                       url(r'^main/$', 'mai'
+                                       'n.views.user_authentication'),
                        url(r'^main/logout/$', 'main.views.logout'),
                        url(r'^main/user/$', 'main.views.getUserAuth'),
                        url(r'^main/(?P<pk>[0-9]+)?$', 'main.views.user_services'),
@@ -16,7 +17,6 @@ urlpatterns = patterns('',
                        url(r'^main/forgotPassword/$', 'main.views.forgotPassword'),
                        url(r'^main/resetPassword/$', 'main.views.resetPassword'),
                        url(r'^main/users/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))?(@)?([A-Za-z0-9]+)?(\.)?([A-Za-z]+)?)$', 'main.views.getUsers'),
-                       url(r'^main/email/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))@[A-Za-z0-9]+(\.[A-Za-z]{2,4}){1,2})/$', 'main.views.getUsers'),
                        url(r'^roles/', 'main.views.getRoles'),
                        url(r'^main/users/delete/(?P<argUserID>[0-9]+)/group/(?P<argGroupID>[0-9]+)$', 'main.views.deleteUser')
 )
