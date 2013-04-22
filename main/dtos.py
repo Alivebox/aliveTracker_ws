@@ -1,7 +1,7 @@
 class PermissionGroupDTO(object):
-    def __init__(self, idPermission, namePermission):
-        self.idPermission = idPermission
-        self.namePermission = namePermission
+    def __init__(self, idpermission, namepermission):
+        self.idpermission = idpermission
+        self.namepermission = namepermission
 
 
 class UserDTO(object):

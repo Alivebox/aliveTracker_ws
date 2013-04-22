@@ -7,7 +7,7 @@ import json
 import locales
 from rest_framework.decorators import api_view
 from main.utils import responseJsonUtil, getPropertyByName, sendEmail, tokenGenerator, md5Encoding, emailExists, \
-    correctForgotPasswordToken, getUserByRequest
+    correctForgotPasswordToken
 from rest_framework.parsers import JSONParser
 from django.contrib.sessions.backends.db import SessionStore
 
@@ -77,8 +77,10 @@ def getUserAuth(argRequest, format=None):
 @api_view(['GET'])
 def user_permissions(request, pk, format=None):
     try:
+        tmpMail = request.META['HTTP_USERNAME']
+        tmpPassword = request.META['HTTP_PASSWORD']
         tmpGroup = Group.objects.get(pk=pk, entity_status=0)
-        tmpUser = getUserByRequest(request)
+        tmpUser = User.objects.get(password=tmpPassword, email=tmpMail, entity_status=0)
         serializer = getGroupPermissionsByUser(tmpUser, tmpGroup)
         return responseJsonUtil(True, None, serializer)
     except User.DoesNotExist:
