@@ -22,8 +22,6 @@ def myLogsServices(request, group, argLog, format=None):
     if request.method == 'GET':
         if not groupExists(group):
             return responseJsonUtil(False, 'ERROR200',  None)
-        if not userIsGroupAdmin(request, group):
-            return responseJsonUtil(False, 'ERROR303',  None)
         tmpDate = getPropertyByName("date",request.QUERY_PARAMS.items())
         tmpResultLogs = Log.objects.raw('select log.id , activity, log.time, log.date, log.user_id, project.id as project_id, project.name as project_name, log.group_id '
                                         'from main_log log inner join main_project project on log.project_id = project.id '
