@@ -129,6 +129,13 @@ def groupExists(argGroupID):
     except Group.DoesNotExist:
         return False
 
+def logExists(argLogID):
+    try:
+        Log.objects.get(id=argLogID)
+        return True
+    except Log.DoesNotExist:
+        return False
+
 # Validate if the project exists in DB
 def projectExists(argProjectID):
     try:

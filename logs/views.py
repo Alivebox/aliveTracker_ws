@@ -7,11 +7,17 @@ from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 
-@api_view(['GET','POST'])
-def myLogsServices(request, group, format=None):
+@api_view(['GET','POST', 'DELETE'])
+def myLogsServices(request, group, argLog, format=None):
 
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103',  None)
+
+    if request.method == 'DELETE':
+        if not logExists(argLog):
+            return responseJsonUtil(False, 'ERROR700',  None)
+        Log.objects.filter(pk=argLog).update(entity_status=1)
+        return responseJsonUtil(True, None, None)
 
     if request.method == 'GET':
         if not groupExists(group):
