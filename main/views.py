@@ -122,8 +122,6 @@ def getUserByGroupAndProject(request, group, project):
         return responseJsonUtil(False, 'ERROR200', None)
     if not projectExists(project):
         return responseJsonUtil(False, 'ERROR500', None)
-    if not userIsGroupAdmin(request, group):
-        return responseJsonUtil(False, 'ERROR309', None)
 
     if request.method == 'GET':
         tmpResultUser = User.objects.raw('select * from main_user tmpUser '
