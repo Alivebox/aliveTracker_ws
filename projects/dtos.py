@@ -12,9 +12,10 @@ class ProjectUserListDTO(object):
 
 
 class UserDTO(object):
-    def __init__(self, id, name, role):
+    def __init__(self, id, name, email, role):
         self.id = id
         self.name = name
+        self.email = email
         self.role = role
 
     def __unicode__(self):

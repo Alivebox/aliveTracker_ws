@@ -4,29 +4,31 @@ from main.dtos import PermissionGroupDTO, UserDTO, UserLoginDTO
 
 
 class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-    fields = ('id', 'name', 'email', 'entity_status')
-    pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
-    name = serializers.CharField(required=True,max_length=50)
-    email = serializers.CharField(max_length=50)
-    entity_status = serializers.IntegerField(default=0)
+        class Meta:
+            model = User
+        fields = ('id', 'name', 'email', 'entity_status')
+        pk = serializers.Field()  # Note: `Field` is an untyped read-only field.
+        name = serializers.CharField(required=True,max_length=50)
+        email = serializers.CharField(max_length=50)
+        entity_status = serializers.IntegerField(default=0)
 
-    def restore_object(self, attrs, instance=None):
-        if instance:
-            instance.name = attrs.get('name', instance.name)
-            instance.email = attrs.get('email', instance.email)
-            instance.entity_status = attrs.get('entity_status', instance.entity_status)
-            return instance
+        def restore_object(self, attrs, instance=None):
+            if instance:
+                instance.name = attrs.get('name', instance.name)
+                instance.email = attrs.get('email', instance.email)
+                instance.entity_status = attrs.get('entity_status', instance.entity_status)
+                return instance
 
-        # Create new instance
-        return User(**attrs)
+            # Create new instance
+            return User(**attrs)
+
 
 class UserSerializerDTO(serializers.Serializer):
     id = serializers.IntegerField()
     email = serializers.CharField()
     name = serializers.CharField()
     entity_status = serializers.IntegerField()
+    default_group = serializers.IntegerField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
@@ -34,6 +36,7 @@ class UserSerializerDTO(serializers.Serializer):
             instance.email = attrs['email']
             instance.name = attrs['name']
             instance.entity_status = attrs['entity_status']
+            instance.default_group = attrs['default_group']
             return instance
         return UserLoginDTO(**attrs)
 

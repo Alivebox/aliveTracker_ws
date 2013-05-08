@@ -12,9 +12,10 @@ class UserDTO(object):
 
 
 class UserLoginDTO(object):
-    def __init__(self, id, email, name, entity_status):
+    def __init__(self, id, email, name, entity_status, default_group):
         self.id = id
         self.email = email
         self.name = name
         self.entity_status = entity_status
+        self.default_group = default_group
 
