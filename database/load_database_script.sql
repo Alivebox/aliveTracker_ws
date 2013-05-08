@@ -1602,3 +1602,9 @@ INSERT INTO main_permission(
     (1, 'read/write', '', 0),
     (2, 'readonly', '', 0);
 
+INSERT INTO main_permission_roles(
+            id, permission_id, role_id)
+    VALUES
+    (1, 1, 1),
+    (2, 2, 2),
+    (3, 2, 3);
