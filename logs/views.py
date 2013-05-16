@@ -87,11 +87,15 @@ def validateExportReport(request):
         return 'ERROR500'
     return None
 
-@api_view(['POST','GET'])
+@api_view(['POST','GET', 'PUT'])
 def exportReport(request, format=None):
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
     if request.method == 'POST':
+        if validateExportReport(request):
+            return responseJsonUtil(False, validateExportReport(request),  None)
+        return responseJsonUtil(True, None, None);
+    if request.method == 'PUT':
         if validateExportReport(request):
             return responseJsonUtil(False, validateExportReport(request),  None)
         return responseJsonUtil(True, None, None);
