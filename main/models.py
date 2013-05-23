@@ -29,6 +29,7 @@ class User(models.Model):
     email = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=128)
     entity_status = models.SmallIntegerField(default=0)
+    default_group = models.SmallIntegerField(default=0)
     session_key = models.TextField()
 
     def __unicode__(self):

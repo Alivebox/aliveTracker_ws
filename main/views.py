@@ -122,8 +122,6 @@ def getUserByGroupAndProject(request, group, project):
         return responseJsonUtil(False, 'ERROR200', None)
     if not projectExists(project):
         return responseJsonUtil(False, 'ERROR500', None)
-    if not userIsGroupAdmin(request, group):
-        return responseJsonUtil(False, 'ERROR309', None)
 
     if request.method == 'GET':
         tmpResultUser = User.objects.raw('select * from main_user tmpUser '
@@ -158,6 +156,20 @@ def update_user(request, pk, format=None):
     user.name = tmpName
     user.password = tmpPassword
     user.entity_status = 0
+    user.save()
+    serializer = UserSerializer(user, data=data)
+    return responseJsonUtil(True, None, serializer)
+
+
+@api_view(['PUT'])
+def update_default_group(request, pk, format=None):
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return responseJsonUtil(False, 404, None)
+    data = JSONParser().parse(request)
+    tmpDefaultGroup = getPropertyByName('default_group', data.items())
+    user.default_group = tmpDefaultGroup
     user.save()
     serializer = UserSerializer(user, data=data)
     return responseJsonUtil(True, None, serializer)

@@ -36,7 +36,7 @@ def myLogsServices(request, group, argLog, format=None):
         tmpActivities = getPropertyByName('activities', data.items())
         tmpGroup = getPropertyByName('group', data.items())
         tmpDate = convertDateFromDatePicker(getPropertyByName('date', data.items()))
-        tmpUser = getUserByRequest(request);
+        tmpUser = getUserByRequest(request)
 
         with transaction.commit_on_success():
             deleteLog(getUserByRequest(request).id, tmpGroup, tmpDate)
@@ -49,6 +49,21 @@ def myLogsServices(request, group, argLog, format=None):
                 tmpLog.save()
             return responseJsonUtil(True, None, None)
         return responseJsonUtil(False, None, None)
+
+
+@api_view(['PUT'])
+def update_log(request, pk, format=None):
+    try:
+        log = Log.objects.get(pk=pk)
+    except Log.DoesNotExist:
+        return responseJsonUtil(False, 404, None)
+    data = JSONParser().parse(request)
+    tmpActivity = getPropertyByName('activity', data.items())
+    tmpTime = getPropertyByName('time', data.items())
+    log.activity = tmpActivity
+    log.time = tmpTime
+    log.save()
+    return responseJsonUtil(False, None, None)
 
 
 def deleteLog(argUser, argGroup, argDate):
@@ -74,11 +89,15 @@ def validateExportReport(request):
         return 'ERROR500'
     return None
 
-@api_view(['POST','GET'])
+@api_view(['POST','GET', 'PUT'])
 def exportReport(request, format=None):
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
     if request.method == 'POST':
+        if validateExportReport(request):
+            return responseJsonUtil(False, validateExportReport(request),  None)
+        return responseJsonUtil(True, None, None);
+    if request.method == 'PUT':
         if validateExportReport(request):
             return responseJsonUtil(False, validateExportReport(request),  None)
         return responseJsonUtil(True, None, None);

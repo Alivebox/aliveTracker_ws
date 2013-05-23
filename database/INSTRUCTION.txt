@@ -1,0 +1,23 @@
+-- INSTRUCTION
+--
+-- For gnu/Linux
+
+1) login as posgres
+# su posgres
+
+2) login as admin into template1
+# psql template1 -U admin
+
+3) Create database:
+=> create database alivetrackerdb;
+
+4) exit
+=> \q
+
+5) login as admin into our new database alivetrackerdb
+# psql alivetrackerdb -U admin
+
+6) run a sql file to create a require schema and inserts.
+=> \i load_database_script.sql;
+
+

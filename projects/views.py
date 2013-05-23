@@ -58,6 +58,7 @@ def convertUserRole(argUserRoleResult):
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
                              name=tmpItem[1],
+                             email=tmpItem[1],
                              role=tmpItem[2])
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
@@ -91,7 +92,8 @@ def saveProject(argRequest, argGroupId, format=None):
                                  entity_status=0,
                                  group=Group.objects.get(pk=argGroupId))
             updateUserListInProject(tmpData, tmpNewProject.id)
-            return responseJsonUtil(True, None, None)
+            tmpSerializer = ProjectSerializer(tmpNewProject)
+            return responseJsonUtil(True, None, tmpSerializer)
         if argRequest.method == 'PUT':
             Project.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
                 name=getPropertyByName('name', tmpData.items()),
