@@ -37,12 +37,21 @@ class User(models.Model):
 
 
 class Log(models.Model):
-    activity = models.TextField()
-    time = models.SmallIntegerField()
-    date = models.DateField()
-    user = models.ForeignKey(User)
-    project = models.ForeignKey(Project)
-    group = models.ForeignKey(Group)
+        activity = models.TextField()
+        time = models.SmallIntegerField()
+        date = models.DateField()
+        user = models.ForeignKey(User)
+        project = models.ForeignKey(Project)
+        group = models.ForeignKey(Group)
+        entity_status = models.SmallIntegerField(default=0)
+
+        def __unicode__(self):
+            return self.name
+
+
+class Note(models.Model):
+    note = models.TextField()
+    log = models.ForeignKey(Log)
     entity_status = models.SmallIntegerField(default=0)
 
     def __unicode__(self):

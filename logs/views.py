@@ -1,8 +1,8 @@
-from main.models import Log, Group
+from main.models import Log, Group, Note
 from main.utils import *
 from logs.logReports import *
-from logs.serializers import LogGroupProjectDateDTOSerializer
-from logs.deserializers import logDeserializer
+from logs.serializers import *
+from logs.deserializers import *
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
@@ -49,6 +49,23 @@ def myLogsServices(request, group, argLog, format=None):
         return responseJsonUtil(False, None, None)
 
 
+@api_view(['POST'])
+def create_log(request, format=None):
+    if not userAuthentication(request):
+        return responseJsonUtil(False, 'ERROR103',  None)
+
+    try:
+        tmpData = JSONParser().parse(request)
+        tmpUser = getUserByRequest(request)
+        tmpDate = convertDateFromDatePicker(getPropertyByName('date', tmpData.items()))
+        tmpLog = logDeserializer(tmpData, tmpUser, tmpDate)
+        tmpLog.save()
+        tmpSerializer = LogSerializer(tmpLog)
+        return responseJsonUtil(True, None, tmpSerializer)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
+
 @api_view(['PUT'])
 def update_log(request, pk, format=None):
     try:
@@ -58,14 +75,45 @@ def update_log(request, pk, format=None):
     data = JSONParser().parse(request)
     tmpActivity = getPropertyByName('activity', data.items())
     tmpTime = getPropertyByName('time', data.items())
+    tmpNotes = getPropertyByName('notes', data.items())
+
+    with transaction.commit_on_success():
+        for tmpObject in tmpNotes:
+            tmpId = getPropertyByName('id', tmpObject.items())
+            tmpAction = getPropertyByName('action', tmpObject.items())
+            if tmpAction == 1:
+                tmpNote = Note.objects.get(pk=getPropertyByName('id', tmpObject.items()))
+                tmpNote.note = getPropertyByName('note', tmpObject.items())
+                tmpNote.save()
+            if tmpId == 0:
+                tmpNote = noteDeserializer(tmpObject)
+                tmpNote.save()
+
     log.activity = tmpActivity
     log.time = tmpTime
     log.save()
-    return responseJsonUtil(False, None, None)
+    tmpSerializer = LogSerializer(log)
+    return responseJsonUtil(True, None, tmpSerializer)
 
 
 def deleteLog(argUser, argGroup, argDate):
     Log.objects.filter(user=argUser, group=Group.objects.get(pk=argGroup), date=argDate).update(entity_status=1)
+
+
+@api_view(['DELETE'])
+def delete_note(request, pk, format=None):
+    try:
+        Note.objects.filter(id=pk).update(entity_status=1)
+        return responseJsonUtil(True, None, None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
+
+@api_view(['GET'])
+def get_notes(request, log, format=None):
+    tmpResultNotes = Note.objects.raw('select id , note, log_id as activity from main_note where log_id = ' + log + ' and entity_status=0')
+    tmpSerializer = NoteSerializer(tmpResultNotes)
+    return responseJsonUtil(True, None, tmpSerializer)
 
 
 def validateProject(request, argProjectID, argGroupID):
@@ -78,6 +126,7 @@ def validateProject(request, argProjectID, argGroupID):
     if not userIsProjectMember(request, argProjectID):
         return 'ERROR305'
     return None
+
 
 def validateExportReport(request):
     data = request.DATA
