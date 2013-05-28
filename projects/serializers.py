@@ -38,12 +38,14 @@ class ProjectUserListDTOSerializer(serializers.Serializer):
 class userListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+    email = serializers.CharField()
     role = serializers.CharField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             instance.id = attrs['id']
             instance.name = attrs['name']
+            instance.email = attrs['email']
             instance.role = attrs['role']
             return instance
         return UserDTO(**attrs)

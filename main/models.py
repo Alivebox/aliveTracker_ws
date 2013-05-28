@@ -29,6 +29,7 @@ class User(models.Model):
     email = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=128)
     entity_status = models.SmallIntegerField(default=0)
+    default_group = models.SmallIntegerField(default=0)
     session_key = models.TextField()
 
     def __unicode__(self):
@@ -36,12 +37,21 @@ class User(models.Model):
 
 
 class Log(models.Model):
-    activity = models.TextField()
-    time = models.SmallIntegerField()
-    date = models.DateField()
-    user = models.ForeignKey(User)
-    project = models.ForeignKey(Project)
-    group = models.ForeignKey(Group)
+        activity = models.TextField()
+        time = models.SmallIntegerField()
+        date = models.DateField()
+        user = models.ForeignKey(User)
+        project = models.ForeignKey(Project)
+        group = models.ForeignKey(Group)
+        entity_status = models.SmallIntegerField(default=0)
+
+        def __unicode__(self):
+            return self.name
+
+
+class Note(models.Model):
+    note = models.TextField()
+    log = models.ForeignKey(Log)
     entity_status = models.SmallIntegerField(default=0)
 
     def __unicode__(self):

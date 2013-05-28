@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from main.models import Log
+from main.models import Log, Note
 from logs.dtos import LogGroupProjectDateDTO
+
 
 class LogSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,3 +52,20 @@ class LogGroupProjectDateDTOSerializer(serializers.Serializer):
             instance.group = attrs['group_id']
             return instance
         return LogGroupProjectDateDTO(**attrs)
+
+
+class NoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+    fields = ('id', 'note')
+    pk = serializers.Field()
+    note = serializers.IntegerField()
+    entity_status = serializers.IntegerField(default=0)
+
+    def restore_object(self, attrs, instance=None):
+        if instance:
+            instance.note = attrs.get('note', instance.user)
+            instance.entity_status = attrs.get('entity_status', instance.entity_status)
+            return instance
+
+        return Note(**attrs)

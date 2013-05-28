@@ -58,6 +58,7 @@ def convertUserRole(argUserRoleResult):
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
                              name=tmpItem[1],
+                             email=tmpItem[1],
                              role=tmpItem[2])
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
