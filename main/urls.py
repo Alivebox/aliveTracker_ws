@@ -5,8 +5,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 admin.autodiscover(),
 urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),
-                       url(r'^main/$', 'mai'
-                                       'n.views.user_authentication'),
+                       url(r'^main/$', 'main.views.user_authentication'),
                        url(r'^main/logout/$', 'main.views.logout'),
                        url(r'^main/user/$', 'main.views.getUserAuth'),
                        url(r'^main/(?P<pk>[0-9]+)?$', 'main.views.user_services'),
