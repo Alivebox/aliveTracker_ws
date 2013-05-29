@@ -121,6 +121,18 @@ def correctForgotPasswordToken(argEmail, argToken):
         return False
 
 
+# get User by email and token
+def getUserByEmailToken(argEmail, argToken):
+    try:
+        tmpUser = User.objects.get(email=argEmail)
+        User_Forgot_Password.objects.get(user=tmpUser, token=argToken)
+        if User_Forgot_Password:
+            return tmpUser
+        return None
+    except User_Forgot_Password.DoesNotExist:
+        return None
+
+
 # Validate if the group exists in DB
 def groupExists(argGroupID):
     try:

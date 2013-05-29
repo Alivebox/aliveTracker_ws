@@ -60,8 +60,8 @@ def user_authentication(argRequest, format=None):
         return responseJsonUtil(False, 'ERROR000', None)
 
 def newSessionHandler(argRequest, argUser):
-    tmpTokken = md5Encoding(tokenGenerator(16))
-    argRequest.session['id'] = tmpTokken
+    tmpToken = md5Encoding(tokenGenerator(16))
+    argRequest.session['id'] = tmpToken
     tmpSession = SessionStore()
     tmpSession.save()
     tmpSessionKey = tmpSession.session_key;
@@ -233,9 +233,36 @@ def forgotPassword(request, format=None):
         else:
             return responseJsonUtil(False, 'ERROR102', None)
 
+@api_view(['PUT'])
+def setPassword(request, format=None):
+    if request.method == 'PUT':
+        if not userAuthentication(request):
+            return responseJsonUtil(False, 'ERROR103', None)
+        data = JSONParser().parse(request)
+        tmpPassword = getPropertyByName('password', data.items())
+        User.objects.filter(session_key=request.session._session_key).update(password=tmpPassword)
+        tmpUser = getUserByRequest(request)
+        tmpSerializer = UserSerializer(tmpUser)
+        return responseJsonUtil(True, None, tmpSerializer)
 
 @api_view(['PUT'])
 def resetPassword(request, format=None):
+    if request.method == 'PUT':
+        data = JSONParser().parse(request)
+        tmpEmail = getPropertyByName('email', data.items())
+        tmpToken = getPropertyByName('token', data.items())
+        tmpPassword = getPropertyByName('password', data.items())
+        if correctForgotPasswordToken(tmpEmail, tmpToken):
+            User.objects.filter(email=tmpEmail).update(password=tmpPassword)
+            tmpUser = User.objects.get(email=tmpEmail)
+            newSessionHandler(request, tmpUser);
+            tmpSerializer = UserSerializer(tmpUser)
+            return responseJsonUtil(True, None, tmpSerializer)
+        else:
+            return responseJsonUtil(False, 'ERROR104', None)
+
+
+def passwordSendEmail(request, format=None):
     if request.method == 'PUT':
         data = JSONParser().parse(request)
         email = getPropertyByName('email', data.items())
