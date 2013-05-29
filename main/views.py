@@ -25,6 +25,19 @@ def user_services(request, pk, format=None):
 
 
 @api_view(['POST'])
+def register_user(request):
+    try:
+        data = JSONParser().parse(request)
+        tmpNewUser = User.objects.create(email=getPropertyByName('email', data.items()),
+                                         password=getPropertyByName('password', data.items()));
+        newSessionHandler(request, tmpNewUser);
+        tmpUserSerializer = UserSerializer(tmpNewUser)
+        return responseJsonUtil(True, None, tmpUserSerializer)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR101', None)
+
+
+@api_view(['POST'])
 def user_authentication(argRequest, format=None):
     try:
         tmpData = JSONParser().parse(argRequest)
@@ -35,13 +48,7 @@ def user_authentication(argRequest, format=None):
         if argRequest.method == 'POST':
 
             if 'id' not in argRequest.session or argRequest.session._session_key == locales.INVALID_SESSION_KEY:
-                tmpTokken = md5Encoding(tokenGenerator(16))
-                argRequest.session['id'] = tmpTokken
-                tmpSession = SessionStore()
-                tmpSession.save()
-                tmpSessionKey = tmpSession.session_key;
-                argRequest.session._session_key = tmpSessionKey
-                User.objects.filter(pk=tmpUser.id).update(session_key=tmpSessionKey)
+                newSessionHandler(argRequest, tmpUser)
             else:
                 User.objects.filter(pk=tmpUser.id).update(session_key=argRequest.session._session_key)
 
@@ -51,6 +58,15 @@ def user_authentication(argRequest, format=None):
         return responseJsonUtil(False, 'ERROR400', None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
+
+def newSessionHandler(argRequest, argUser):
+    tmpToken = md5Encoding(tokenGenerator(16))
+    argRequest.session['id'] = tmpToken
+    tmpSession = SessionStore()
+    tmpSession.save()
+    tmpSessionKey = tmpSession.session_key;
+    argRequest.session._session_key = tmpSessionKey
+    User.objects.filter(pk=argUser.id).update(session_key=tmpSessionKey)
 
 @api_view(['POST'])
 def logout(argRequest):
@@ -130,18 +146,6 @@ def getUserByGroupAndProject(request, group, project):
             group) + ' and id=' + str(project) + ' )) tmpProjectUser on  tmpUser.id = tmpProjectUser.userId')
         tmpSerializer = UserDTOSerializer(tmpResultUser)
         return responseJsonUtil(True, None, tmpSerializer)
-
-
-@api_view(['POST'])
-def register_user(request):
-    try:
-        data = JSONParser().parse(request)
-        tmpNewUser = User.objects.create(email=getPropertyByName('email', data.items()),
-                                         password=getPropertyByName('password', data.items()))
-        tmpUserSerializer = UserSerializer(tmpNewUser)
-        return responseJsonUtil(True, None, tmpUserSerializer)
-    except BaseException:
-        return responseJsonUtil(False, 'ERROR101', None)
 
 
 @api_view(['PUT'])
@@ -229,9 +233,36 @@ def forgotPassword(request, format=None):
         else:
             return responseJsonUtil(False, 'ERROR102', None)
 
+@api_view(['PUT'])
+def setPassword(request, format=None):
+    if request.method == 'PUT':
+        if not userAuthentication(request):
+            return responseJsonUtil(False, 'ERROR103', None)
+        data = JSONParser().parse(request)
+        tmpPassword = getPropertyByName('password', data.items())
+        User.objects.filter(session_key=request.session._session_key).update(password=tmpPassword)
+        tmpUser = getUserByRequest(request)
+        tmpSerializer = UserSerializer(tmpUser)
+        return responseJsonUtil(True, None, tmpSerializer)
 
 @api_view(['PUT'])
 def resetPassword(request, format=None):
+    if request.method == 'PUT':
+        data = JSONParser().parse(request)
+        tmpEmail = getPropertyByName('email', data.items())
+        tmpToken = getPropertyByName('token', data.items())
+        tmpPassword = getPropertyByName('password', data.items())
+        if correctForgotPasswordToken(tmpEmail, tmpToken):
+            User.objects.filter(email=tmpEmail).update(password=tmpPassword)
+            tmpUser = User.objects.get(email=tmpEmail)
+            newSessionHandler(request, tmpUser);
+            tmpSerializer = UserSerializer(tmpUser)
+            return responseJsonUtil(True, None, tmpSerializer)
+        else:
+            return responseJsonUtil(False, 'ERROR104', None)
+
+
+def passwordSendEmail(request, format=None):
     if request.method == 'PUT':
         data = JSONParser().parse(request)
         email = getPropertyByName('email', data.items())
