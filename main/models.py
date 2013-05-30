@@ -38,7 +38,7 @@ class User(models.Model):
 
 class Log(models.Model):
         activity = models.TextField()
-        time = models.SmallIntegerField()
+        time = models.FloatField()
         date = models.DateField()
         user = models.ForeignKey(User)
         project = models.ForeignKey(Project)
