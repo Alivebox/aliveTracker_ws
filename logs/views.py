@@ -75,8 +75,6 @@ def update_log(request, pk, format=None):
     except Log.DoesNotExist:
         return responseJsonUtil(False, 404, None)
     data = JSONParser().parse(request)
-    tmpActivity = getPropertyByName('activity', data.items())
-    tmpTime = getPropertyByName('time', data.items())
     tmpNotes = getPropertyByName('notes', data.items())
 
     with transaction.commit_on_success():
@@ -91,10 +89,12 @@ def update_log(request, pk, format=None):
                 tmpNote = noteDeserializer(tmpObject)
                 tmpNote.save()
 
-    log.activity = tmpActivity
-    log.time = tmpTime
-    log.save()
-    tmpSerializer = LogSerializer(log)
+    Log.objects.filter(id=getPropertyByName('id', data.items())).update(
+        activity=getPropertyByName('activity', data.items()),
+        time=getPropertyByName('time', data.items()),
+        project=Project.objects.get(pk=getPropertyByName('project', data.items())))
+    tmpLog = Log.objects.get(pk=pk)
+    tmpSerializer = LogSerializer(tmpLog)
     return responseJsonUtil(True, None, tmpSerializer)
 
 

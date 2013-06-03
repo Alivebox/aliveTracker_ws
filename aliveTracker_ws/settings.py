@@ -16,12 +16,12 @@ DATABASES = {
          # The following settings are not used with sqlite3:
          'USER': 'admin',
          'PASSWORD': 'admin',
-         'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.   
+         'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
          'PORT': '3606',                      # Set to empty string for default.
       }
       # 'default': {
       #    'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-      #    'NAME': 'alivetrackerdb',                      # Or path to database file if using sqlite3.
+      #    'NAME': 'alivetrackertest',                      # Or path to database file if using sqlite3.
       #    # The following settings are not used with sqlite3:
       #    'USER': 'admin',
       #    'PASSWORD': 'admin',

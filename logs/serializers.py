@@ -33,7 +33,7 @@ class LogSerializer(serializers.ModelSerializer):
 class LogGroupProjectDateDTOSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     activity = serializers.CharField()
-    time = serializers.IntegerField(default=0)
+    time = serializers.FloatField(default=0)
     date = serializers.CharField()
     user = serializers.IntegerField(default=0)
     project = serializers.IntegerField()
