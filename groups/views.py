@@ -93,7 +93,7 @@ def getUsersByGroup(argRequest, argGroupID, format=None):
     if argRequest.method == 'GET':
         try:
             cursor = connection.cursor()
-            cursor.execute('select muser.id as id, muser.email as email, mrole.name as role \
+            cursor.execute('select muser.id as id, muser.name as name, muser.email as email, mrole.name as role \
             from main_group_user group_user inner join main_user muser on muser.id = group_user.user_id \
             inner join main_role mrole on group_user.role_id = mrole.id \
             where muser.entity_status = 0 and group_user.group_id = ' + str(argGroupID))
@@ -111,8 +111,8 @@ def convertUserRole(argUserRoleResult):
     for tmpItem in argUserRoleResult:
         tmpUserDTO = UserDTO(id=tmpItem[0],
                              name=tmpItem[1],
-                             email=tmpItem[1],
-                             role=tmpItem[2])
+                             email=tmpItem[2],
+                             role=tmpItem[3])
         tmpUserDTOSerializer = userListSerializer(tmpUserDTO)
         tmpList.append(tmpUserDTOSerializer.data)
     return tmpList
