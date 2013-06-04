@@ -12,13 +12,31 @@ MANAGERS = ADMINS
 DATABASES = {
       'default': {
          'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-          'NAME': 'alivetrackerdb',                      # Or path to database file if using sqlite3.
+          'NAME': 'alivetrackertest',                      # Or path to database file if using sqlite3.
          # The following settings are not used with sqlite3:
          'USER': 'admin',
-         'PASSWORD': 'a1iV3b0x',
-         'HOST': 'alivetracker.chaeh7lykoen.us-west-2.rds.amazonaws.com',    # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+         'PASSWORD': 'admin',
+         'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
          'PORT': '3606',                      # Set to empty string for default.
       }
+      # 'default': {
+      #    'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+      #    'NAME': 'alivetrackertest',                      # Or path to database file if using sqlite3.
+      #    # The following settings are not used with sqlite3:
+      #    'USER': 'admin',
+      #    'PASSWORD': 'admin',
+      #    'HOST': '172.16.0.191',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+      #    'PORT': '5432',                      # Set to empty string for default.
+      # }
+    # 'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #   'NAME': 'aliveTrackerdb',                      # Or path to database file if using sqlite3.
+    #    # The following settings are not used with sqlite3:
+    #     'USER': '',
+    #     'PASSWORD': '',
+    #     'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+    #     'PORT': '',
+    #     }
 }
 
 # Local time zone for this installation. Choices can be found here:

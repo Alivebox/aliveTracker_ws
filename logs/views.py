@@ -134,8 +134,6 @@ def validateExportReport(request):
     data = request.DATA
     if not groupExists(getPropertyByName('group',data.items())):
         return 'ERROR200'
-    if not projectExists(getPropertyByName('project',data.items())):
-        return 'ERROR500'
     return None
 
 @api_view(['POST','GET', 'PUT'])
@@ -158,7 +156,7 @@ def exportReport(request, format=None):
         tmpDateRangeId = getPropertyByName('dateRangeOption',data.items())
         tmpStartDate = convertDateFromDatePicker(getPropertyByName('startDate',data.items()))
         tmpEndDate = convertDateFromDatePicker(getPropertyByName('endDate',data.items()))
-        errorCode = exportReportPermissionsValidation(tmpGroupID, tmpProjectID, tmpUserID)
+        errorCode = exportReportPermissionsValidation(tmpGroupID)
         if errorCode != None:
             return responseJsonUtil(False, errorCode, None)
         reportBook = buildReport(tmpGroupID, tmpProjectID, tmpUserID,tmpDateRangeId,tmpStartDate,tmpEndDate)
@@ -170,7 +168,7 @@ def listReport(request, group, project, user, range):
     if not userAuthentication(request):
         return responseJsonUtil(False, 'ERROR103', None)
     if request.method == 'GET':
-        errorCode = exportReportPermissionsValidation(group, project, user)
+        errorCode = exportReportPermissionsValidation(group)
         if errorCode != None:
             return responseJsonUtil(False, errorCode, None)
         data = request.QUERY_PARAMS
@@ -181,20 +179,10 @@ def listReport(request, group, project, user, range):
         return responseJsonUtil(True, None, tmpSerializer)
 
 
-def exportReportPermissionsValidation(argGroupID,argProjectID,argUserID):
+def exportReportPermissionsValidation(argGroupID):
     try:
         Group.objects.get(id = argGroupID)
     except:
         return 'ERROR200'
-    if argProjectID!=0:
-        try:
-            Project.objects.get(id = argProjectID)
-        except:
-            return 'ERROR500'
-    if argUserID!=0:
-        try:
-            User.objects.get(id = argUserID)
-        except:
-            return 'ERROR400'
     return None
 

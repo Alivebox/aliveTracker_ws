@@ -55,11 +55,14 @@ def addSheetRow(argReportSheet,argIndex,argValue, argUserName, argHeaderStyle):
 
 def buildReport(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
     reportBook = Workbook()
-    if argUserID!=0:
+    if argUserID!='0':
         tmpUser = User.objects.get(id = argUserID)
         reportBook = addUserReportSheet(reportBook,argGroupID,argProjectID,tmpUser,argRangeId, argStartDate, argEndDate)
     else:
-        query= 'select * from main_user where id in ( select user_id from main_group_user where group_id='+str(argGroupID)+' ) and entity_status <> 1'
+        if argUserID =='0' and argProjectID=='0':
+            query= 'select * from main_user where id in ( select user_id from main_group_user where group_id='+str(argGroupID)+' ) and entity_status <> 1'
+        else:
+            query= 'select * from main_user where id in ( select user_id from main_project_user where project_id='+str(argProjectID)+' ) and entity_status <> 1'
         tmpUsers = User.objects.raw(query)
         for value in tmpUsers:
             reportBook = addUserReportSheet(reportBook,argGroupID,argProjectID,value,argRangeId, argStartDate, argEndDate)
@@ -81,8 +84,9 @@ def addUserReportSheet(reportBook,argGroupID,argProjectID,argUser, argRangeId, a
 def buildReportQuery(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
     tmpFilter = "select log.id , activity, log.time, log.date, project.name as project_name from " \
                 "main_log log inner join main_project project on log.project_id = project.id " \
-                "where log.group_id = "+str(argGroupID)
-    tmpFilter = tmpFilter +" and  log.user_id = "+ str(argUserID)
+                "where project.entity_status = 0 and log.group_id = "+str(argGroupID)
+    if argUserID != '0':
+        tmpFilter = tmpFilter +" and  log.user_id = "+ str(argUserID)
     if argProjectID != '0':
         tmpFilter = tmpFilter +" and  project_id = "+ str(argProjectID)
     if argRangeId == '0':
