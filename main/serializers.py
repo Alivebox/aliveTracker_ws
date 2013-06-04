@@ -68,13 +68,13 @@ class GroupUserSerializer(serializers.ModelSerializer):
 
 
 class PermissionGroupDTOSerializer(serializers.Serializer):
-    idpermission = serializers.IntegerField()
-    namepermission = serializers.CharField()
+    idPermission = serializers.IntegerField()
+    namePermission = serializers.CharField()
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
-            instance.idPermission = attrs['idpermission']
-            instance.namePermission = attrs['namepermission']
+            instance.idPermission = attrs['idPermission']
+            instance.namePermission = attrs['namePermission']
             return instance
         return PermissionGroupDTO(**attrs)
 
