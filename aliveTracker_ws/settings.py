@@ -17,7 +17,7 @@ DATABASES = {
          'USER': 'admin',
          'PASSWORD': 'admin',
          'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-         'PORT': '3606',                      # Set to empty string for default.
+         'PORT': '3306',                      # Set to empty string for default.
       }
       # 'default': {
       #    'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
