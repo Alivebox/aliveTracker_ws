@@ -96,13 +96,13 @@ def buildReportQuery(argGroupID,argProjectID,argUserID, argRangeId, argStartDate
         tmpFilter = tmpFilter +" and date between '"+str(argStartDate)+"' and '"+str(argEndDate)+"'"
     else:
         if argRangeId == '1':
-            tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-1' and CURRENT_DATE"
+            tmpFilter = tmpFilter +" and date between DATE_SUB(CURRENT_DATE,INTERVAL 1 DAY) and CURRENT_DATE"
         if argRangeId == '2':
-            tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-7' and CURRENT_DATE"
+            tmpFilter = tmpFilter +" and date between DATE_SUB(CURRENT_DATE,INTERVAL 7 DAY) and CURRENT_DATE"
         if argRangeId == '3':
-            tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-14' and CURRENT_DATE"
+            tmpFilter = tmpFilter +" and date between DATE_SUB(CURRENT_DATE,INTERVAL 14 DAY) and CURRENT_DATE"
         if argRangeId == '4':
-            tmpFilter = tmpFilter +" and date between CURRENT_DATE + integer '-30' and CURRENT_DATE"
+            tmpFilter = tmpFilter +" and date between DATE_SUB(CURRENT_DATE,INTERVAL 30 DAY) and CURRENT_DATE"
     return tmpFilter+" and log.entity_status = 0 order by project_id, date asc"
 
 
