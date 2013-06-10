@@ -6,6 +6,7 @@ from logs.deserializers import *
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
+from django.db import connection
 
 @api_view(['GET','POST', 'DELETE'])
 def myLogsServices(request, group, argLog, format=None):
@@ -185,4 +186,57 @@ def exportReportPermissionsValidation(argGroupID):
     except:
         return 'ERROR200'
     return None
+
+
+@api_view(['POST', 'PUT'])
+def sendStatus(request, format=None):
+    data = JSONParser().parse(request)
+    cursor = connection.cursor()
+    tmpUser = User.objects.get(email=getPropertyByName('email', data.items()))
+    tmpUserId = tmpUser.id
+    tmpDate = convertDateFromDatePicker(getPropertyByName('date', data.items()))
+    cursor.execute('select distinct project_id from main_log where date =\'' + tmpDate + '\'' + ' and user_id =' + str(tmpUserId) + ' and entity_status=0')
+    for row in cursor.fetchall():
+        tmpAdminEmails = []
+        tmpLogs = []
+        tmpProjectId = row[0]
+        cursor.execute('select email from main_project mproject, main_project_user mprojectuser, main_user muser '
+                       'where mproject.id = mprojectuser.project_id and mprojectuser.user_id = muser.id '
+                       'and mproject.id=' + str(tmpProjectId) + ' and mprojectuser.role_id = 1')
+        for row in cursor.fetchall():
+            tmpAdminEmails.insert(0,row[0])
+        cursor.execute('select activity, log.time, log.date, project.name as project_name, log.id '
+                       'from main_log log inner join main_project project on log.project_id = project.id '
+                       'where log.entity_status=0 and log.user_id =' + str(tmpUserId) + ' and '
+                       'log.date =\'' + tmpDate + '\'' + ' and project_id = ' + str(tmpProjectId))
+        for row in cursor.fetchall():
+            tmpLogs.insert(0,row)
+        user_email = getPropertyByName('email', data.items())
+        if emailExists(user_email):
+            code = md5Encoding(tokenGenerator())
+            FROM = user_email
+            activities = ""
+            for item in tmpLogs:
+                cursor.execute('select note from main_note where log_id =' + str(item[4]) + ' and entity_status = 0')
+                notes = ""
+                for row in cursor.fetchall():
+                    notes += row[0] + '\n'
+                activities += '\n'"""Task: """ + item[0] + '\n' """Time: """ + str(item[1]) + """ hours""" '\n' + """Notes: """ + notes +'\n'
+            SUBJECT = "Status " + item[3] + " Date: " + str(item[2])
+            MESSAGE = """
+            There is my status:
+                """ + activities + """
+
+            Thanks"""
+            try:
+                tmpUser = User.objects.get(email=user_email)
+            except:
+                return responseJsonUtil(False, 'ERROR000', None)
+            try:
+                sendEmail(user_email, tmpAdminEmails, SUBJECT, MESSAGE)
+            except:
+                return responseJsonUtil(False, 'ERROR002', None)
+        else:
+            return responseJsonUtil(False, 'ERROR102', None)
+    return responseJsonUtil(True, None, None)
 
