@@ -220,7 +220,7 @@ def sendStatus(request, format=None):
                 cursor.execute('select note from main_note where log_id =' + str(item[4]) + ' and entity_status = 0')
                 notes = ""
                 for row in cursor.fetchall():
-                    notes += row[0] + '\n'
+                    notes += '\n' + row[0]
                 activities += '\n'"""Task: """ + item[0] + '\n' """Time: """ + str(item[1]) + """ hours""" '\n' + """Notes: """ + notes +'\n'
             SUBJECT = "Status " + item[3] + " Date: " + str(item[2])
             MESSAGE = """
