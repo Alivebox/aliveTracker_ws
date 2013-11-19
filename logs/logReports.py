@@ -87,7 +87,9 @@ def addUserReportSheet(reportBook,argGroupID,argProjectID,argUser, argRangeId, a
 def buildReportQuery(argGroupID,argProjectID,argUserID, argRangeId, argStartDate=None, argEndDate=None):
     tmpFilter = "select log.id , activity, log.time, log.date, project.name as project_name from " \
                 "main_log log inner join main_project project on log.project_id = project.id " \
-                "where project.entity_status = 0 and log.group_id = "+str(argGroupID)
+                "where project.entity_status = 0"
+    if argGroupID != '0':
+        tmpFilter = tmpFilter +" and log.group_id = "+str(argGroupID)
     if argUserID != '0':
         tmpFilter = tmpFilter +" and  log.user_id = "+ str(argUserID)
     if argProjectID != '0':
