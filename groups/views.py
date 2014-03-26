@@ -31,18 +31,35 @@ def groupsServices(argRequest, format=None):
             except BaseException:
                 return responseJsonUtil(False, 'ERROR000', None)
         if argRequest.method == 'PUT':
-            try:
-                tmpData = JSONParser().parse(argRequest)
-                Group.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
-                    name=getPropertyByName('name', tmpData.items()),
-                    description=getPropertyByName('description', tmpData.items()),
-                    logo_url=getPropertyByName('logo_url', tmpData.items()),
-                    web_site_url=getPropertyByName('web_site_url', tmpData.items()))
-                modifiedGroup = Group.objects.get(id=getPropertyByName('id', tmpData.items()))
-                tmpSerializer = GroupSerializer(modifiedGroup)
-                return responseJsonUtil(True, None, tmpSerializer)
-            except Group.DoesNotExist:
-                return responseJsonUtil(False, 'ERROR000', None)
+            tmpData = JSONParser().parse(argRequest)
+            tmpidtoevaluate = getPropertyByName('id', tmpData.items())
+            if tmpidtoevaluate == 0:
+                try:
+                    tmpnewgroup = Group.objects.create(name=getPropertyByName('name', tmpData.items()),
+                                                       description=getPropertyByName('description', tmpData.items()),
+                                                       logo_url=getPropertyByName('logo_url', tmpData.items()),
+                                                       web_site_url=getPropertyByName('web_site_url', tmpData.items()),
+                                                       created=date.today())
+                    tmpuser = getUserByRequest(argRequest)
+                    Group_User.objects.create(user = tmpuser,
+                                              group = tmpnewgroup,
+                                              role = getAdminRole())
+                    tmpserializer = GroupSerializer(tmpnewgroup)
+                    return responseJsonUtil(True, None, tmpserializer)
+                except BaseException:
+                    return responseJsonUtil(False,'ERROR000', None)
+            else:
+                try:
+                    Group.objects.filter(id=getPropertyByName('id', tmpData.items())).update(
+                        name=getPropertyByName('name', tmpData.items()),
+                        description=getPropertyByName('description', tmpData.items()),
+                        logo_url=getPropertyByName('logo_url', tmpData.items()),
+                        web_site_url=getPropertyByName('web_site_url', tmpData.items()))
+                    modifiedGroup = Group.objects.get(id=getPropertyByName('id', tmpData.items()))
+                    tmpSerializer = GroupSerializer(modifiedGroup)
+                    return responseJsonUtil(True, None, tmpSerializer)
+                except Group.DoesNotExist:
+                    return responseJsonUtil('False', 'ERROR000', None)
     else:
         return responseJsonUtil(False, 'ERROR103', None)
 
