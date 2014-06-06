@@ -21,14 +21,12 @@ def myLogsServices(request, group, argLog, format=None):
         return responseJsonUtil(True, None, None)
 
     if request.method == 'GET':
-        if not groupExists(group):
-            return responseJsonUtil(False, 'ERROR200',  None)
         tmpDate = getPropertyByName("date",request.QUERY_PARAMS.items())
         if not tmpDate:
             return responseJsonUtil(False, 'ERROR800',  None)
         tmpResultLogs = Log.objects.raw('select log.id , activity, log.time, log.date, log.user_id, project.id as project_id, project.name as project_name, log.group_id '
                                         'from main_log log inner join main_project project on log.project_id = project.id '
-                                        'where log.entity_status=0 and log.user_id = '+str(getUserByRequest(request).id)+' and log.group_id = '+group+' and log.date =\''+tmpDate+'\'')
+                                        'where log.entity_status=0 and log.user_id = '+str(getUserByRequest(request).id)+' and log.date =\''+tmpDate+'\'')
         tmpSerializer = LogGroupProjectDateDTOSerializer(tmpResultLogs)
         return responseJsonUtil(True, None, tmpSerializer)
 

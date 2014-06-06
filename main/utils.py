@@ -51,6 +51,13 @@ def getAdminRole():
     except User.DoesNotExist:
         return None
 
+def getDeveloperRole():
+    try:
+        tmpRole = Role.objects.get(pk=2)
+        return tmpRole
+    except User.DoesNotExist:
+        return None
+
 # The format string which returns is ej: September 24 2010 17:03
 def dateToString(argDate):
     return argDate.strftime('%B %d %Y %H:%M')

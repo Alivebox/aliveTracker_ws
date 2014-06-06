@@ -9,7 +9,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'created', 'entity_status', 'group')
         id = serializers.IntegerField()
         name = serializers.CharField(required=True,max_length=30)
-        description = serializers.CharField(required=True,max_length=250)
+        description = serializers.CharField(max_length=250)
         created = serializers.CharField(required=True,max_length=250)
         entity_status = serializers.IntegerField(default=0)
         group = serializers.PrimaryKeyRelatedField()

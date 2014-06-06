@@ -27,10 +27,26 @@ def getProjectsByUserAndGroup(argRequest, argGroupID, format=None):
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
+@api_view(['GET'])
+def getAllProjectsByUser(argRequest, format=None):
+    if not userAuthentication(argRequest):
+        return responseJsonUtil(False,'ERROR103', None)
+    try:
+        tmpUserId = getUserByRequest(argRequest)._get_pk_val
+        tmpResult = Project.objects.all().filter(project_user__user=tmpUserId, entity_status=0)
+        serializer = ProjectSerializer(tmpResult)
+        return responseJsonUtil(True,None,serializer)
+    except User.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR400', None)
+    except Project.DoesNotExist:
+        return responseJsonUtil(False, 'ERROR500', None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
 
 # Returns users who belongs to the respective ID
 @api_view(['GET'])
-def getProject(argRequest, argProjectID, format=None):
+def getUserProjectByGroup(argRequest, argProjectID, format=None):
     if not userAuthentication(argRequest):
         return responseJsonUtil(False, 'ERROR103', None)
     try:
@@ -50,6 +66,16 @@ def getProject(argRequest, argProjectID, format=None):
         return responseJsonUtil(False, 'ERROR500', None)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
+
+
+@api_view(['GET'])
+def getProjectsByGroup(argRequest, argGroupId, format=None):
+    try:
+        tmpResult = Project.objects.all().filter(group=argGroupId, entity_status=0)
+        serializer = ProjectSerializer(tmpResult)
+        return responseJsonUtil(True,None,serializer)
+    except BaseException:
+        return responseJsonUtil(False,'ERROR000', None)
 
 
 # Get the query result to serialize
@@ -144,5 +170,41 @@ def deleteProject(argRequest, argProjectID, format=None):
             return responseJsonUtil(True, None, tmpSerializer)
     except Project.DoesNotExist:
         return responseJsonUtil(False, 'ERROR500', None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
+@api_view(['POST','PUT'])
+def saveUserProject(argRequest,argProjectID,argUserId, format=None):
+    try:
+        tmpUser = User.objects.get(pk=argUserId)
+        tmpUserRole = Role.objects.get(pk=2)
+        tmpProject = Project.objects.get(pk=argProjectID)
+
+        Project_User.objects.create(user=tmpUser,
+                                    project=tmpProject,
+                                    role=tmpUserRole)
+
+        return responseJsonUtil(True,None,None)
+
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
+@api_view(['PUT'])
+def deleteUserProject(argRequest, argProjectId, argUserId,format=None):
+
+    try:
+
+        Project_User.objects.filter(user_id=argUserId, project_id=argProjectId).delete()
+
+        return responseJsonUtil(True,None,None)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
+
+@api_view(['GET'])
+def getAllProjects(argRequest, format=None):
+    try:
+        tmpAllProjects = Project.objects.all()
+        tmpProjectsSerialize = ProjectSerializer(tmpAllProjects)
+        return responseJsonUtil(True, None, tmpProjectsSerialize)
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)

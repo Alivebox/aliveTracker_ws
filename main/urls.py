@@ -19,7 +19,10 @@ urlpatterns = patterns('',
                        url(r'^main/setPassword/$', 'main.views.setPassword'),
                        url(r'^main/users/(?P<argEmail>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))?(@)?([A-Za-z0-9]+)?(\.)?([A-Za-z]+)?)$', 'main.views.getUsers'),
                        url(r'^roles/', 'main.views.getRoles'),
-                       url(r'^main/users/delete/(?P<argUserID>[0-9]+)/group/(?P<argGroupID>[0-9]+)$', 'main.views.deleteUser')
+                       url(r'^main/users/delete/(?P<argUserID>[0-9]+)/group/(?P<argGroupID>[0-9]+)$', 'main.views.deleteUser'),
+                       url(r'^main/addUserByGroup/(?P<argGroupID>[0-9]+)/email/(?P<argEmailUser>(([A-Za-z0-9]+)|([A-Za-z0-9]+\.[A-Za-z0-9]+))?(@)?([A-Za-z0-9]+)?(\.)?([A-Za-z]+)?)$','main.views.createOrUpdateUserGroup'),
+                       url(r'^main/addGroupUser/(?P<argGroupID>[0-9]+)$','main.views.createGroupUsers'),
+                       url(r'^main/user/getAllUsers/$', 'main.views.getAllUsers'),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

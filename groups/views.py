@@ -10,7 +10,7 @@ from projects.serializers import userListSerializer
 from django.db import connection, transaction
 
 
-@api_view(['DELETE', 'POST', 'PUT'])
+@api_view(['DELETE', 'POST', 'PUT','GET'])
 def groupsServices(argRequest, format=None):
     if userAuthentication(argRequest):
         if argRequest.method == 'POST':
@@ -60,8 +60,26 @@ def groupsServices(argRequest, format=None):
                     return responseJsonUtil(True, None, tmpSerializer)
                 except Group.DoesNotExist:
                     return responseJsonUtil('False', 'ERROR000', None)
+        if argRequest.method == 'GET':
+            return responseJsonUtil(True, None, None)
     else:
         return responseJsonUtil(False, 'ERROR103', None)
+
+@api_view(['GET'])
+def getAllGroupsByUser(request,format=None):
+    if(userAuthentication(request)):
+        try:
+            tmpUser = getUserByRequest(request)
+            tmpUserPk = tmpUser._get_pk_val
+            tmpGroupsFiltered = Group.objects.all().filter(group_user__user=tmpUserPk,  entity_status = 0)
+            serializer = GroupSerializer(tmpGroupsFiltered)
+            return responseJsonUtil(True,None,serializer)
+        except User.DoesNotExist:
+            return responseJsonUtil(False, 'ERROR400', None)
+        except BaseException:
+            return responseJsonUtil(False, 'ERROR000', None)
+    else:
+        return responseJsonUtil(False,'ERROR400', None)
 
 
 @api_view(['GET'])
@@ -151,6 +169,14 @@ def updateUserRole(argRequest, format=None):
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
+@api_view(['GET'])
+def getAllGroups(argRequest, format=None):
+    try:
+        tmpGroups = Group.objects.all()
+        tmpGroupSerializer = GroupSerializer(tmpGroups)
+        return responseJsonUtil(True, None, tmpGroupSerializer)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000', None)
 
 
 # Delete all users that belong to a project

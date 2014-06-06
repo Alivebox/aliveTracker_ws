@@ -1,8 +1,9 @@
 from os import tmpnam
 from main.models import User, Group_User, Project_User, User_Forgot_Password, Group, Role
 from main.serializers import UserSerializer, PermissionGroupDTOSerializer, UserDTOSerializer, UserSerializerDTO, \
-    RoleSerializer
-from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin
+    RoleSerializer,GroupUserSerializer
+from main.utils import userAuthentication, projectExists, groupExists, userIsGroupAdmin,getDeveloperRole,\
+    tokenGenerator, md5Encoding
 import json
 import locales
 from rest_framework.decorators import api_view
@@ -321,3 +322,75 @@ def deleteUser(argRequest, argUserID, argGroupID):
     except BaseException:
         return responseJsonUtil(False, 'ERROR000', None)
 
+@api_view(['GET'])
+def getAllUsers(argRequest, format=None):
+    try:
+        tmpAllUsers = User.objects.all()
+        tmpAllUsersSerializer = UserSerializer(tmpAllUsers)
+        return responseJsonUtil(True, None, tmpAllUsersSerializer)
+    except BaseException:
+        return responseJsonUtil(False, 'ERROR000',  None)
+
+
+@api_view(['POST','PUT'])
+def createOrUpdateUserGroup(argRequest, argGroupID, argEmailUser, format=None):
+    data = JSONParser().parse(argRequest)
+
+    if argRequest.method == 'POST':
+        try:
+            TO = argEmailUser
+            FROM = "team@alivebox.com"
+            tmpPassword = tokenGenerator()
+            onUserInvitationEmail(FROM,TO,tmpPassword)
+
+            encryptedPassword = md5Encoding(tmpPassword)
+            tmpNewUser = User.objects.create(email=argEmailUser,
+                                             password=encryptedPassword)
+
+            newSessionHandler(argRequest, tmpNewUser)
+
+            tmpGroupInstance = Group.objects.get(pk=argGroupID)
+
+            Group_User.objects.create(user=tmpNewUser,
+                                    group=tmpGroupInstance,
+                                    role=getDeveloperRole())
+
+            tmpUserSerializer = UserSerializer(tmpNewUser)
+            return responseJsonUtil(True, None, tmpUserSerializer)
+        except BaseException:
+            return responseJsonUtil(False, 'ERROR101', None)
+
+    if argRequest.method == 'PUT':
+        try:
+            tmpUserToAddGroup = User.objects.get(pk=getPropertyByName('id', data.items()))
+
+            tmpGroupInstance = Group.objects.get(pk=argGroupID)
+            Group_User.objects.create(user=tmpUserToAddGroup,
+                                      group=tmpGroupInstance,
+                                      role=getDeveloperRole())
+
+            tmpUserSerializer = UserSerializer(tmpUserToAddGroup)
+            return responseJsonUtil(True, None, tmpUserSerializer)
+        except BaseException:
+            return responseJsonUtil(False, 'ERROR101', None)
+
+def onUserInvitationEmail(FROM, TO, temporallyPassword ):
+    SUBJECT="You were invited to join to Spuras app"
+    MESSAGE = """
+           Hello,You are inviting to join to Spuras application,
+            Spuras generate a temporally password special for you:
+
+            password: """ + temporallyPassword + """
+
+            To login to our  app, please go to:
+
+            http://www.alivetracker.com/Spuras/#loginPage
+
+            As Advise, change the password after login in to the application
+
+            Ignore this email if you haven't experienced any password trouble.
+
+            Thanks,
+            AliveTracker Team"""
+
+    sendEmail(FROM, TO, SUBJECT, MESSAGE)
